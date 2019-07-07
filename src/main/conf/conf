@@ -1,0 +1,11 @@
+#TODO read these props
+fullScreen=false
+width=50%
+height=50%
+name=Game
+windowPositionX=30%
+windowPositionY=30%
+swapInterval=1
+FOV=60
+Z_NEAR=0.1
+Z_FAR=1000
