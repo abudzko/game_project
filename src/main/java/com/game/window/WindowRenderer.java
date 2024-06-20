@@ -36,7 +36,7 @@ public class WindowRenderer implements OnCameraChangedListener {
     private static final float FOV = (float) Math.toRadians(60f);
 
     private static final float Z_NEAR = 0.1f;
-    private static final float Z_FAR = 10.f;
+    private static final float Z_FAR = 100.f;
 
     private float aspectRatio;
     private Matrix4f projectionMatrix;
@@ -51,8 +51,6 @@ public class WindowRenderer implements OnCameraChangedListener {
         this.AR = aspectRatio;
 
         setMatrices();
-
-
     }
 
     private void setMatrices() {

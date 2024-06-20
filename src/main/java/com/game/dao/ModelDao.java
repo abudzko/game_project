@@ -18,14 +18,14 @@ public class ModelDao {
                     0,
                     new Vector3f(0f, 0f, 0f),
                     new Vector3f(0f, 0f, 0f),
-                    3
+                    16
             ));
 
             put(1, new ModelWrapper(
                     1,
                     new Vector3f(0f, 0f, 0f),
                     new Vector3f(0f, 0f, 0f),
-                    0.3f
+                    0.05f
             ));
         }
     };

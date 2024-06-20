@@ -30,7 +30,6 @@ public class Shader {
         if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println(String.format("Failed to compile [%s] shader!", type));
             System.err.println(glGetShaderInfoLog(id));
-            return;
         }
     }
 

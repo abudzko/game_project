@@ -23,18 +23,23 @@ public class Engine implements Runnable {
         boolean set = false;
         while (isRunning) {
             Window mainWindow = monitor.getWindow(MAIN_WINDOW_NAME);
-            if (mainWindow != null && !set) {//TODO fix
-                set = true;
-                mainWindow.addModel(modelDao.getModel(0));
-                mainWindow.addModel(modelDao.getModel(1));
-                Model m = modelDao.getModel(1);
-                m.getPosition().set(-0.5f, 0, 0);
-                mainWindow.addModel(m);
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (mainWindow != null) {//TODO fix
+                if (!set) {
+                    set = true;
+                    mainWindow.addModel(modelDao.getModel(0));
+                    mainWindow.addModel(modelDao.getModel(1));
+                    Model m = modelDao.getModel(1);
+                    m.getPosition().set(0, 0, 0);
+                    mainWindow.addModel(m);
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (mainWindow.shouldBeClosed()) {
+                    break;
+                }
             }
         }
     }

@@ -3,7 +3,6 @@ package com.game.shader;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import org.lwjgl.opengl.GL11;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -20,7 +19,7 @@ public class Texture {
 
     private int loadTexture(String path) throws IOException {
         //load png file
-        PNGDecoder decoder = new PNGDecoder(new FileInputStream(path));
+        PNGDecoder decoder = new PNGDecoder(getClass().getResourceAsStream(path));
 
         //create a byte buffer big enough to store RGBA values
         ByteBuffer buffer = ByteBuffer.allocateDirect(4 * decoder.getWidth() * decoder.getHeight());

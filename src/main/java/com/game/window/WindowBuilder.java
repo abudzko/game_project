@@ -40,8 +40,8 @@ public class WindowBuilder {
         window.setWidth(width);
         window.setHeight(height);
         window.setName(name);
-        window.setMonitorId(monitorId);
-        window.setFullScreen(fullScreen);
+        window.setMonitor(monitorId);
+//        window.setFullScreen(fullScreen);
         window.setPositionX(positionX);
         window.setPositionY(positionY);
         window.setSwapInterval(swapInterval);
@@ -87,10 +87,10 @@ public class WindowBuilder {
         return this;
     }
 
-    public WindowBuilder fullScreen(boolean fullScreen) {
-        this.fullScreen = fullScreen;
-        return this;
-    }
+//    public WindowBuilder fullScreen(boolean fullScreen) {
+//        this.fullScreen = fullScreen;
+//        return this;
+//    }
 
     public WindowBuilder setSwapInterval(int swapInterval) {
         this.swapInterval = swapInterval;
@@ -101,6 +101,11 @@ public class WindowBuilder {
         this.camera = camera;
         return this;
     }
+
+//    public WindowBuilder setMonitor(Monitor monitor) {
+//        this.monitor = monitor;
+//        return this;
+//    }
 
     private void initEventCallbacks(final Window window) {
         long windowId = window.getWindowId();
@@ -118,7 +123,7 @@ public class WindowBuilder {
 
             @Override
             public void invoke(long windowId, int button, int action, int mods) {
-                GLFW.glfwGetCursorPos(windowId, cursorX, cursorY);
+                GLFW.glfwGetCursorPos(windowId, cursorX.asDoubleBuffer(), cursorY.asDoubleBuffer());
                 double x = cursorX.getDouble();
                 double y = cursorY.getDouble();
 
@@ -146,7 +151,7 @@ public class WindowBuilder {
 
         GLFW.glfwSetCursorEnterCallback(windowId, new GLFWCursorEnterCallback() {
             @Override
-            public void invoke(long windowId, int entered) {
+            public void invoke(long window, boolean entered) {
 
             }
         });

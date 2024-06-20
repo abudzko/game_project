@@ -38,8 +38,8 @@ public class SimpleModel extends Model {
 
     {
         try {
-            texture = new Texture("E:\\work\\workspace\\game_project\\src\\main\\resources\\texture\\green.png");
-            texture4 = new Texture("E:\\work\\workspace\\game_project\\src\\main\\resources\\texture\\red.png");
+            texture = new Texture("/texture/green.png");
+            texture4 = new Texture("/texture/red.png");
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

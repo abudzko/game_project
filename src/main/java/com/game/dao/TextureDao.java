@@ -73,13 +73,13 @@ public class TextureDao {
         {
             put(0, new TextureWrapper(
                     0,
-                    "E:\\work\\workspace\\game_project\\src\\main\\resources\\texture\\green.png",
+                    "/texture/green.png",
                     TEXTURE_VERTICES0
             ));
 
             put(1, new TextureWrapper(
                     1,
-                    "E:\\work\\workspace\\game_project\\src\\main\\resources\\texture\\any.png",
+                    "/texture/cat512.png",
                     TEXTURE_VERTICES1
             ));
         }

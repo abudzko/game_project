@@ -31,7 +31,7 @@ public class Window implements WindowEventListener {
     private int positionY;
 
     private final ConcurrentHashMap<Integer, Model> modelMap = new ConcurrentHashMap<>();
-    private  HashMap<Integer, DrawableModel> drawableModels = new HashMap<>();
+    private HashMap<Integer, DrawableModel> drawableModels = new HashMap<>();
 
     private Camera camera;
     private WindowRenderer windowRenderer;
@@ -39,7 +39,7 @@ public class Window implements WindowEventListener {
     private String name;
 
     private long monitorId;
-    private boolean fullScreen = false;
+//    private boolean fullScreen = false;
 
     private int swapInterval = 1;
 
@@ -48,11 +48,12 @@ public class Window implements WindowEventListener {
 
     public void init() {
         setWindowHints();
-        windowId = GLFW.glfwCreateWindow(
+
+        windowId = org.lwjgl.glfw.GLFW.glfwCreateWindow(
                 width,
                 height,
                 name,
-                fullScreen ? monitorId : NULL,
+                monitorId,
                 NULL
         );
 
@@ -61,16 +62,16 @@ public class Window implements WindowEventListener {
             throw new RuntimeException("Failed to create the GLFW window");
         }
 
-        if (!fullScreen) {
-            GLFW.glfwSetWindowPos(windowId, positionX, positionY);
-        }
+//        if (!fullScreen) {
+//        GLFW.glfwSetWindowPos(windowId, positionX, positionY);
+//        }
         GLFW.glfwMakeContextCurrent(windowId);
         GL.createCapabilities();
 
 //        glEnable(GL_BLEND);
 //        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-//        GLFW.glfwSwapInterval(swapInterval);
+        GLFW.glfwSwapInterval(swapInterval);
 //        GL11.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     }
 
@@ -123,7 +124,7 @@ public class Window implements WindowEventListener {
     }
 
     public boolean shouldBeClosed() {
-        return glfwWindowShouldClose(windowId) == GLFW.GLFW_TRUE;
+        return glfwWindowShouldClose(windowId);
     }
 
     public void setWidth(int width) {
@@ -146,11 +147,11 @@ public class Window implements WindowEventListener {
         this.name = name;
     }
 
-    public void setFullScreen(boolean fullScreen) {
-        this.fullScreen = fullScreen;
-    }
+//    public void setFullScreen(boolean fullScreen) {
+//        this.fullScreen = fullScreen;
+//    }
 
-    public void setMonitorId(long monitorId) {
+    public void setMonitor(long monitorId) {
         this.monitorId = monitorId;
     }
 
@@ -192,7 +193,9 @@ public class Window implements WindowEventListener {
                         cameraMoved = true;
                         break;
                     case GLFW.GLFW_KEY_ESCAPE:
-                        GLFW.glfwSetWindowShouldClose(windowId, GLFW.GLFW_TRUE);
+                        GLFW.glfwSetWindowShouldClose(windowId, true);
+                        destroy();
+                        System.out.println("close");
                         break;
                     default:
                         cameraMoved = false;
@@ -209,11 +212,11 @@ public class Window implements WindowEventListener {
                         camera.moveY(step);
                         cameraMoved = true;
                         break;
-                    case GLFW.GLFW_KEY_RIGHT:
+                    case org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT:
                         camera.moveX(step);
                         cameraMoved = true;
                         break;
-                    case GLFW.GLFW_KEY_LEFT:
+                    case org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT:
                         camera.moveX(-step);
                         cameraMoved = true;
                         break;
@@ -234,8 +237,9 @@ public class Window implements WindowEventListener {
     @Override
     public void processScrollEvent(ScrollEvent scrollEvent) {
         float step = -0.1f;
-        camera.moveX((int) scrollEvent.getOffsetX() * step);
-        camera.moveY((int) scrollEvent.getOffsetY() * step);
+//        camera.moveX((int) scrollEvent.getOffsetX() * step);
+//        camera.moveY((int) scrollEvent.getOffsetY() * step);
+        camera.moveZ((int) scrollEvent.getOffsetY() * step);
         windowRenderer.onCameraChanged(camera);
     }
 
