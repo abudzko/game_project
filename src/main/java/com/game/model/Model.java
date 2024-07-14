@@ -11,9 +11,10 @@ import org.joml.Vector3f;
  */
 public class Model {
     private final int id;
-
     private final Vector3f position;
-
+    /**
+     * An angles measured in degrees
+     */
     private final Vector3f rotation;
     private final float scale;
 

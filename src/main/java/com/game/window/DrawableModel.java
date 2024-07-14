@@ -7,15 +7,15 @@ import com.game.utils.math.Matrix4f;
 import java.nio.FloatBuffer;
 
 public class DrawableModel {
-    private int vaoId;
+    private final int vaoId;
 
-    private FloatBuffer vertices;
+    private final FloatBuffer vertices;
 
-    private Texture texture;
+    private final Texture texture;
 
     private volatile Matrix4f worldMatrix;
 
-    DrawableModel(
+    public DrawableModel(
             Model model,
             int vaoId,
             FloatBuffer vertices,
@@ -27,7 +27,7 @@ public class DrawableModel {
         updateWorldMatrix(model);
     }
 
-    public void updateWorldMatrix(Model model) {
+    private void updateWorldMatrix(Model model) {
         Matrix4f matrix4f = new Matrix4f();
         matrix4f.translate(model.getPosition())
                 .rotateX((float) Math.toRadians(model.getRotation().x))

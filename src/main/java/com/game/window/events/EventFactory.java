@@ -1,4 +1,4 @@
-package com.game.input.events;
+package com.game.window.events;
 
 public class EventFactory {
     public static KeyEvent buildKeyEvent(int key, int scanCode, int action, int mods) {

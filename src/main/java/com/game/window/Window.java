@@ -1,17 +1,17 @@
 package com.game.window;
 
-import com.game.input.WindowEventListener;
-import com.game.input.events.KeyEvent;
-import com.game.input.events.ScrollEvent;
-import com.game.input.events.WindowResizeEvent;
-import com.game.model.Camera;
 import com.game.model.Model;
+import com.game.shader.Program;
+import com.game.utils.log.LogUtil;
+import com.game.utils.math.Matrix4f;
+import com.game.window.events.WindowEvents;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
@@ -19,60 +19,106 @@ import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
 import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
+import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class Window implements WindowEventListener {
-    private long windowId;
-
+public class Window {
+    private final WindowConfig windowConfig;
+    private final Camera camera;
+    private final ConcurrentHashMap<Integer, Model> modelMap = new ConcurrentHashMap<>();
+    private final HashMap<Integer, DrawableModel> drawableModels = new HashMap<>();
     private int width;
     private int height;
-    private int positionX;
-    private int positionY;
+    private long windowId;
+    private Program program;
 
-    private final ConcurrentHashMap<Integer, Model> modelMap = new ConcurrentHashMap<>();
-    private HashMap<Integer, DrawableModel> drawableModels = new HashMap<>();
-
-    private Camera camera;
-    private WindowRenderer windowRenderer;
-
-    private String name;
-
-    private long monitorId;
-//    private boolean fullScreen = false;
-
-    private int swapInterval = 1;
-
-    public Window() {
+    public Window(WindowConfig windowConfig) {
+        this.windowConfig = windowConfig;
+        this.width = windowConfig.getDefaultWidth();
+        this.height = windowConfig.getDefaultHeight();
+        this.camera = new Camera();
     }
 
-    public void init() {
+    public void start() throws InterruptedException {
+        var countDownLaunch = new CountDownLatch(1);
+        var windowRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // All lwjgl calls "This function must only be called from the main thread." should be done in same Thread
+                    init();
+                    show();
+                    createProgram();
+                    countDownLaunch.countDown();
+                    while (!shouldBeClosed()) {
+                        GLFW.glfwPollEvents();
+                        render();
+                    }
+                } catch (RuntimeException e) {
+                    LogUtil.logError(String.format("Error happened inside window [%s] thread. %s", windowId, e.getMessage()));
+                } finally {
+                    destroy();
+                }
+            }
+        };
+
+        var windowThread = new Thread(windowRunnable);
+        windowThread.start();
+        // Wait while window will be initialized
+        countDownLaunch.await();
+    }
+
+    private void init() {
+        // Set an error callback. The default implementation
+        // will print the error message in System.err.
+        GLFWErrorCallback.createPrint(System.err).set();
+        // Initialize GLFW. Most GLFW functions will not work before doing this.
+        if (!glfwInit()) {
+            throw new IllegalStateException("Unable to initialize GLFW");
+        }
+
+        var monitorId = GLFW.glfwGetPrimaryMonitor();
+        var videoMode = GLFW.glfwGetVideoMode(monitorId);
+        monitorId = NULL;
+        assert videoMode != null;
+
         setWindowHints();
 
         windowId = org.lwjgl.glfw.GLFW.glfwCreateWindow(
                 width,
                 height,
-                name,
+                windowConfig.getWindowName(),
                 monitorId,
                 NULL
         );
 
         if (windowId == NULL) {
             GLFW.glfwTerminate();
-            throw new RuntimeException("Failed to create the GLFW window");
+            throw new IllegalStateException("Failed to create the GLFW window");
         }
 
-//        if (!fullScreen) {
-//        GLFW.glfwSetWindowPos(windowId, positionX, positionY);
-//        }
         GLFW.glfwMakeContextCurrent(windowId);
         GL.createCapabilities();
 
-//        glEnable(GL_BLEND);
-//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GLFW.glfwSwapInterval(windowConfig.getSwapInterval());
 
-        GLFW.glfwSwapInterval(swapInterval);
-//        GL11.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        new WindowEvents(this).attachEvents();
+    }
+
+    private void createProgram() {
+        program = new Program(windowId);
+        var aspectRatio = (float) getWidth() / (float) getHeight();
+        updateProjectionMatrix(aspectRatio);
+        getProgram().linkProgram();
+        cameraChanged();
+    }
+
+    private Program getProgram() {
+        if (program == null) {
+            throw new IllegalStateException(String.format("Program for window [%s] was not created", windowId));
+        }
+        return program;
     }
 
     private void setWindowHints() {
@@ -85,15 +131,15 @@ public class Window implements WindowEventListener {
 
     public void render() {
         readFreshModels();
-        windowRenderer.render(drawableModels.values());
+        getProgram().render(drawableModels.values());
     }
 
     private void readFreshModels() {
-        if (modelMap.size() > 0) {//TODO rework
-            Iterator<Model> iterator = modelMap.values().iterator();
+        if (modelMap.size() > 0) {// TODO rework
+            var iterator = modelMap.values().iterator();
             while (iterator.hasNext()) {
-                Model model = iterator.next();
-                drawableModels.put(model.getId(), windowRenderer.createDrawableModel(model));
+                var model = iterator.next();
+                drawableModels.put(model.getId(), getProgram().createDrawableModel(model));
                 iterator.remove();
             }
         }
@@ -103,19 +149,19 @@ public class Window implements WindowEventListener {
         return windowId;
     }
 
-    public int getWidth() {
+    private int getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    private int getHeight() {
         return height;
     }
 
-    public void destroy() {
+    private void destroy() {
         GLFW.glfwDestroyWindow(windowId);
     }
 
-    public void show() {
+    private void show() {
         GLFW.glfwShowWindow(windowId);
     }
 
@@ -127,134 +173,49 @@ public class Window implements WindowEventListener {
         return glfwWindowShouldClose(windowId);
     }
 
-    public void setWidth(int width) {
-        this.width = width;
+    public void windowSizeChanged(int newWidth, int newHeight) {
+        width = newWidth;
+        height = newHeight;
+        var aspectRatio = (float) width / (float) height;
+        updateProjectionMatrix(aspectRatio);
+        getProgram().cameraViewMatrixChanged(camera.getLookAtMatrix());
     }
 
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public void setPositionX(int positionX) {
-        this.positionX = positionX;
-    }
-
-    public void setPositionY(int positionY) {
-        this.positionY = positionY;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-//    public void setFullScreen(boolean fullScreen) {
-//        this.fullScreen = fullScreen;
-//    }
-
-    public void setMonitor(long monitorId) {
-        this.monitorId = monitorId;
-    }
-
-    public void setSwapInterval(int swapInterval) {
-        this.swapInterval = swapInterval;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setWindowRenderer(WindowRenderer windowRenderer) {
-        this.windowRenderer = windowRenderer;
-    }
-
-    @Override
-    public void processKeyEvent(KeyEvent keyEvent) {
-        float step = 0.1f;
-        boolean cameraMoved = false;
-
-        switch (keyEvent.getAction()) {
-
-            case GLFW.GLFW_PRESS:
-                switch (keyEvent.getKey()) {
-                    case GLFW.GLFW_KEY_UP:
-                        camera.moveY(-step);
-                        cameraMoved = true;
-                        break;
-                    case GLFW.GLFW_KEY_DOWN:
-                        camera.moveY(step);
-                        cameraMoved = true;
-                        break;
-                    case GLFW.GLFW_KEY_RIGHT:
-                        camera.moveX(step);
-                        cameraMoved = true;
-                        break;
-                    case GLFW.GLFW_KEY_LEFT:
-                        camera.moveX(-step);
-                        cameraMoved = true;
-                        break;
-                    case GLFW.GLFW_KEY_ESCAPE:
-                        GLFW.glfwSetWindowShouldClose(windowId, true);
-                        destroy();
-                        System.out.println("close");
-                        break;
-                    default:
-                        cameraMoved = false;
-                        break;
-                }
-                break;
-            case GLFW.GLFW_REPEAT:
-                switch (keyEvent.getKey()) {
-                    case GLFW.GLFW_KEY_UP:
-                        camera.moveY(-step);
-                        cameraMoved = true;
-                        break;
-                    case GLFW.GLFW_KEY_DOWN:
-                        camera.moveY(step);
-                        cameraMoved = true;
-                        break;
-                    case org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT:
-                        camera.moveX(step);
-                        cameraMoved = true;
-                        break;
-                    case org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT:
-                        camera.moveX(-step);
-                        cameraMoved = true;
-                        break;
-                    default:
-                        break;
-                }
-        }
-
-        if (cameraMoved) {
-            cameraChanged();
-        }
-    }
-
-    private void cameraChanged() {
-        windowRenderer.onCameraChanged(camera);
-    }
-
-    @Override
-    public void processScrollEvent(ScrollEvent scrollEvent) {
-        float step = -0.1f;
-//        camera.moveX((int) scrollEvent.getOffsetX() * step);
-//        camera.moveY((int) scrollEvent.getOffsetY() * step);
-        camera.moveZ((int) scrollEvent.getOffsetY() * step);
-        windowRenderer.onCameraChanged(camera);
-    }
-
-
-    public void setCamera(Camera camera) {
-        this.camera = camera;
+    public void moveCameraX(float step) {
+        camera.moveX(step);
         cameraChanged();
     }
 
-    @Override
-    public void processWindowResizeEvent(WindowResizeEvent windowResizeEvent) {
-        windowRenderer.setAR((float) windowResizeEvent.getNewWidth() / (float) windowResizeEvent.getNewHeight());
+    public void moveCameraY(float step) {
+        camera.moveY(step);
+        cameraChanged();
+    }
+
+    public void moveCameraZ(float step) {
+        camera.moveZ(step);
+        cameraChanged();
+    }
+
+    private void cameraChanged() {
+        getProgram().cameraViewMatrixChanged(camera.getLookAtMatrix());
     }
 
     public void addModel(Model model) {
         modelMap.put(model.getId(), model);
+    }
+
+    private void updateProjectionMatrix(float aspectRatio) {
+        var projectionMatrix = new Matrix4f();
+        projectionMatrix.perspective(
+                windowConfig.getDefaultFov(),
+                aspectRatio,
+                windowConfig.getDefaultZNear(),
+                windowConfig.getDefaultZFar()
+        );
+        getProgram().projectionMatrixChanged(projectionMatrix);
+    }
+
+    public WindowConfig getWindowConfig() {
+        return windowConfig;
     }
 }

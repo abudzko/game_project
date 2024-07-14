@@ -9,50 +9,38 @@ import java.util.Map;
 public class ModelDao {
 
     private static final VerticesDao verticesDao = new VerticesDao();
-    private static final TextureDao textureDao= new TextureDao();
+    private static final TextureDao textureDao = new TextureDao();
 
-
-    private static final Map<Integer, ModelWrapper> MODELS = new HashMap<Integer, ModelWrapper>() {
-        {
-            put(0, new ModelWrapper(
-                    0,
-                    new Vector3f(0f, 0f, 0f),
-                    new Vector3f(0f, 0f, 0f),
-                    16
-            ));
-
-            put(1, new ModelWrapper(
-                    1,
-                    new Vector3f(0f, 0f, 0f),
-                    new Vector3f(0f, 0f, 0f),
-                    0.05f
-            ));
-        }
-    };
+    private static final Map<Integer, Model> MODELS = createModels();
 
     public Model getModel(int id) {
-        ModelWrapper modelWrapper = MODELS.get(id);
-        Model model = new Model(
-                id,
-                modelWrapper.position,
-                modelWrapper.rotation,
-                modelWrapper.scale
-        );
-        return model;
-
+        return MODELS.get(id);
     }
 
-    static class ModelWrapper {
-        final int id;
-        final Vector3f position;
-        final Vector3f rotation;
-        final float scale;
+    private static Map<Integer, Model> createModels() {
+        var models = new HashMap<Integer, Model>();
+        var m0 = new Model(
+                0,
+                new Vector3f(0f, 0f, 0f),
+                new Vector3f(0f, 0f, 0f),
+                1f
+        );
 
-        ModelWrapper(int id, Vector3f position, Vector3f rotation, float scale) {
-            this.id = id;
-            this.position = position;
-            this.rotation = rotation;
-            this.scale = scale;
-        }
+        var m1 = new Model(
+                1,
+                new Vector3f(0f, 0f, 0f),
+                new Vector3f(0f, 0f, 0f),
+                0.05f
+        );
+        var m2 = new Model(
+                2,
+                new Vector3f(0f, 0f, -1f),
+                new Vector3f(90f, 0f, 0f),
+                1f
+        );
+        models.put(m0.getId(), m0);
+        models.put(m1.getId(), m1);
+        models.put(m2.getId(), m2);
+        return models;
     }
 }

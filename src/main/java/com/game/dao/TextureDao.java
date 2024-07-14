@@ -2,6 +2,7 @@ package com.game.dao;
 
 import com.game.shader.Texture;
 import com.game.utils.BufferUtils;
+import com.game.utils.log.LogUtil;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -69,6 +70,16 @@ public class TextureDao {
             1, 1,
     };
 
+    private static final float[] TEXTURE_VERTICES2 = {
+            0, 0,
+            0, 1,
+            1, 1,
+
+            0, 0,
+            1, 0,
+            1, 1
+    };
+
     private static final Map<Integer, TextureWrapper> TEXTURES = new HashMap<Integer, TextureWrapper>() {
         {
             put(0, new TextureWrapper(
@@ -82,12 +93,17 @@ public class TextureDao {
                     "/texture/cat512.png",
                     TEXTURE_VERTICES1
             ));
+
+            put(2, new TextureWrapper(
+                    2,
+                    "/texture/sky.png",
+                    TEXTURE_VERTICES2
+            ));
         }
     };
 
     public Texture getTexture(int id) {
         try {
-
             TextureWrapper textureWrapper = TEXTURES.get(id);
             Texture texture = new Texture(textureWrapper.path);
             FloatBuffer textureVertices = BufferUtils.createFloatBuffer(textureWrapper.textureVertices);
@@ -95,7 +111,7 @@ public class TextureDao {
             return texture;
 
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            LogUtil.logError(String.format("Texture id %s %s", id, e.getMessage()));
         }
         return null;
     }

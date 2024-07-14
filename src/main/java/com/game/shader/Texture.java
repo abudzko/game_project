@@ -18,22 +18,22 @@ public class Texture {
     }
 
     private int loadTexture(String path) throws IOException {
-        //load png file
+        // Load png file
         PNGDecoder decoder = new PNGDecoder(getClass().getResourceAsStream(path));
 
-        //create a byte buffer big enough to store RGBA values
+        // Create a byte buffer big enough to store RGBA values
         ByteBuffer buffer = ByteBuffer.allocateDirect(4 * decoder.getWidth() * decoder.getHeight());
 
-        //decode
+        // Decode
         decoder.decode(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
 
-        //flip the buffer so its ready to read
+        // Flip the buffer(prepare for reading)
         buffer.flip();
 
-        //create a texture
+        // Create a texture
         int id = GL11.glGenTextures();
 
-        //bind the texture
+        // Bind the texture
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
 
         //tell opengl how to unpack bytes

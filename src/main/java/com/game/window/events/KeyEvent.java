@@ -1,4 +1,4 @@
-package com.game.input.events;
+package com.game.window.events;
 
 public class KeyEvent {
     private final int key;

@@ -1,7 +1,7 @@
-package com.game.model;
+package com.game.window;
 
+import com.game.utils.log.LogUtil;
 import com.game.utils.math.Matrix4f;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
 public class Camera {
@@ -31,13 +31,20 @@ public class Camera {
     }
 
     public void moveY(float delta) {
-        this.centerZ += delta;
-        this.eyeZ += delta;
-        look();
+        float newValue = this.eyeY + delta;
+        if (newValue > 0.01) {
+            LogUtil.log(String.format("Move camera from %s to %s eyeY position", this.eyeY, newValue));
+            this.eyeY = newValue;
+            look();
+        } else {
+            LogUtil.log(String.format("Can't move camera from %s to %s eyeY position", this.eyeY, newValue));
+        }
     }
 
     public void moveZ(float delta) {
-        this.eyeY += delta;
+        this.centerZ += delta;
+        this.eyeZ += delta;
+        LogUtil.log(String.format("Move camera to %s eyeZ position", this.eyeZ));
         look();
     }
 
