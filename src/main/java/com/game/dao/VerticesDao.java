@@ -2,12 +2,8 @@ package com.game.dao;
 
 import com.game.utils.BufferUtils;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class VerticesDao {
@@ -90,6 +86,10 @@ public class VerticesDao {
     };
 
     public FloatBuffer getVertices(int id) {
+        var data = VERTICES.get(id);
+        if (data == null) {
+            throw new IllegalArgumentException(String.format("There is no data by id [%s]", id));
+        }
         return BufferUtils.createFloatBuffer(VERTICES.get(id));
     }
 }

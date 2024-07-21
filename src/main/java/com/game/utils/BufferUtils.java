@@ -1,37 +1,22 @@
 package com.game.utils;
 
+import org.lwjgl.system.MemoryUtil;
+
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public class BufferUtils {
 
     public static ByteBuffer createByteBuffer(byte[] array) {
-        ByteBuffer result = ByteBuffer.allocateDirect(array.length)
-                .order(ByteOrder.nativeOrder());
-        result.put(array);
-        result.flip();
-        return result;
+        return MemoryUtil.memAlloc(array.length).put(array).flip();
     }
 
     public static FloatBuffer createFloatBuffer(float[] array) {
-        FloatBuffer result = ByteBuffer.allocateDirect(array.length << 2)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        result.put(array);
-        result.flip();
-        return result;
+        return MemoryUtil.memAllocFloat(array.length).put(array).flip();
     }
 
     public static IntBuffer createIntBuffer(int[] array) {
-        IntBuffer result = ByteBuffer.allocateDirect(array.length << 2)
-                .order(ByteOrder.nativeOrder())
-                .asIntBuffer();
-        result.put(array);
-        result.flip();
-        return result;
+        return MemoryUtil.memAllocInt(array.length).put(array).flip();
     }
-
-
 }

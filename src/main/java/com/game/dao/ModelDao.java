@@ -23,7 +23,7 @@ public class ModelDao {
                 0,
                 new Vector3f(0f, 0f, 0f),
                 new Vector3f(0f, 0f, 0f),
-                1f
+                10f
         );
 
         var m1 = new Model(
@@ -34,9 +34,9 @@ public class ModelDao {
         );
         var m2 = new Model(
                 2,
-                new Vector3f(0f, 0f, -1f),
+                new Vector3f(0f, 0f, -10f),
                 new Vector3f(90f, 0f, 0f),
-                1f
+                10f
         );
         models.put(m0.getId(), m0);
         models.put(m1.getId(), m1);

@@ -4,8 +4,6 @@ public class WindowConfig {
     private final boolean isFullScreen = false;
     private final int defaultWidth = 500;
     private final int defaultHeight = 500;
-    private int defaultPositionX = 0;
-    private int defaultPositionY = 0;
 
     private float defaultFov = (float) Math.toRadians(50f);
 
@@ -51,13 +49,5 @@ public class WindowConfig {
 
     public int getDefaultHeight() {
         return defaultHeight;
-    }
-
-    public int getDefaultPositionX() {
-        return defaultPositionX;
-    }
-
-    public int getDefaultPositionY() {
-        return defaultPositionY;
     }
 }

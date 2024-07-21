@@ -1,5 +1,6 @@
 package com.game.window.events;
 
+import com.game.dao.ModelDao;
 import com.game.utils.BufferUtils;
 import com.game.utils.log.LogUtil;
 import com.game.window.Window;
@@ -15,6 +16,9 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class WindowEvents {
     private final Window window;
+
+    private final ModelDao modelDao = new ModelDao();
+    private float moveStep = 0.05f;
 
     public WindowEvents(Window window) {
         this.window = window;
@@ -96,11 +100,24 @@ public class WindowEvents {
                     case GLFW.GLFW_KEY_LEFT:
                         window.moveCameraX(-step);
                         break;
+                    case GLFW.GLFW_KEY_W:
+                        moveZ(-moveStep);
+                        break;
+                    case GLFW.GLFW_KEY_S:
+                        moveZ(moveStep);
+                        break;
+                    case GLFW.GLFW_KEY_A:
+                        moveX(-moveStep);
+                        break;
+                    case GLFW.GLFW_KEY_D:
+                        moveX(moveStep);
+                        break;
                     case GLFW.GLFW_KEY_ESCAPE:
                         GLFW.glfwSetWindowShouldClose(window.getWindowId(), true);
                         LogUtil.log(String.format("Close window %s", window.getWindowId()));
                         break;
                     default:
+                        LogUtil.log(String.format("Pressed %s", keyEvent.getKey()));
                         break;
                 }
                 break;
@@ -112,15 +129,29 @@ public class WindowEvents {
                     case GLFW.GLFW_KEY_DOWN:
                         window.moveCameraZ(step);
                         break;
-                    case org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT:
+                    case GLFW.GLFW_KEY_RIGHT:
                         window.moveCameraX(step);
                         break;
-                    case org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT:
+                    case GLFW.GLFW_KEY_LEFT:
                         window.moveCameraX(-step);
+                        break;
+                    case GLFW.GLFW_KEY_W:
+                        moveZ(-moveStep);
+                        break;
+                    case GLFW.GLFW_KEY_S:
+                        moveZ(moveStep);
+                        break;
+                    case GLFW.GLFW_KEY_A:
+                        moveX(-moveStep);
+                        break;
+                    case GLFW.GLFW_KEY_D:
+                        moveX(moveStep);
                         break;
                     default:
                         break;
                 }
+                break;
+            case GLFW.GLFW_RELEASE:
                 break;
             default:
                 break;
@@ -138,6 +169,18 @@ public class WindowEvents {
 
     public void processMouseEvent(MouseEvent mouseEvent) {
 
+    }
+
+    private void moveX(float stepX) {
+        var model = modelDao.getModel(1);
+        model.getPosition().x += stepX;
+        window.addModel(model);
+    }
+
+    private void moveZ(float stepZ) {
+        var model = modelDao.getModel(1);
+        model.getPosition().z += stepZ;
+        window.addModel(model);
     }
 
 }

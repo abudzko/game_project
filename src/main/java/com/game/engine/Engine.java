@@ -3,8 +3,11 @@ package com.game.engine;
 import com.game.dao.ModelDao;
 import com.game.window.Window;
 
+import java.util.Random;
+
 public class Engine implements Runnable {
 
+    protected static final Random RANDOM = new Random();
     private final ModelDao modelDao = new ModelDao();
     private final Window window;
 
@@ -27,6 +30,12 @@ public class Engine implements Runnable {
             }
             if (window.shouldBeClosed()) {
                 break;
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
             }
         }
     }

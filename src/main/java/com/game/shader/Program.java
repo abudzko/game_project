@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.system.MemoryUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -110,13 +111,14 @@ public class Program {
 
         // Unbind the VBO
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        MemoryUtil.memFree(vertices);
 
         // Textures
         var texture = textureDao.getTexture(id);
         int textureVboId = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, textureVboId);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, texture.getTextureVertices(), GL15.GL_STATIC_DRAW);
-
+        var textureVertices = texture.getTextureVertices();
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureVertices, GL15.GL_STATIC_DRAW);
         var textureAttribute = GL20.glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
         GL20.glVertexAttribPointer(textureAttribute, 2, GL11.GL_FLOAT, false, 0, 0);
         // Unbind the VBO
@@ -124,6 +126,7 @@ public class Program {
 
         // Unbind the VAO
         GL30.glBindVertexArray(0);
+        MemoryUtil.memFree(textureVertices);
         return new DrawableModel(model, vaoId, vertices, texture);
     }
 
