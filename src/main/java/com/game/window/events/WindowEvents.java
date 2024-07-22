@@ -14,11 +14,14 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 
+/**
+ * TODO create event listener interfaces and add listeners into this class
+ */
 public class WindowEvents {
     private final Window window;
 
     private final ModelDao modelDao = new ModelDao();
-    private float moveStep = 0.05f;
+    private final float moveStep = 0.05f;
 
     public WindowEvents(Window window) {
         this.window = window;
@@ -171,14 +174,20 @@ public class WindowEvents {
 
     }
 
+    /**
+     * TODO This logic should be in event listeners
+     */
     private void moveX(float stepX) {
-        var model = modelDao.getModel(1);
+        var model = modelDao.findGameUnit(1);
         model.getPosition().x += stepX;
         window.addModel(model);
     }
 
+    /**
+     * TODO This logic should be in event listeners
+     */
     private void moveZ(float stepZ) {
-        var model = modelDao.getModel(1);
+        var model = modelDao.findGameUnit(1);
         model.getPosition().z += stepZ;
         window.addModel(model);
     }

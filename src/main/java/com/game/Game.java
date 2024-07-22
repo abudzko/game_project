@@ -6,9 +6,9 @@ import com.game.window.WindowConfig;
 
 public class Game {
 
-    private Window window;
+    private final Window window;
 
-    private Engine engine;
+    private final Engine engine;
 
     public Game() {
         var windowConfig = new WindowConfig();

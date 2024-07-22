@@ -13,12 +13,12 @@ public class Camera {
     private float eyeZ = 1;
 
     private float centerX = 0;
-    private float centerY = 0;
+    private final float centerY = 0;
     private float centerZ = 0;
 
-    private float upX = 0;
-    private float upY = 1;
-    private float upZ = 0;
+    private final float upX = 0;
+    private final float upY = 1;
+    private final float upZ = 0;
 
     public Camera() {
         look();

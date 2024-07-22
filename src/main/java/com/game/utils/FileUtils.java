@@ -10,7 +10,7 @@ public class FileUtils {
     public static String loadAsString(String path) {
         try {
             return Files.readString(Path.of(path));
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }

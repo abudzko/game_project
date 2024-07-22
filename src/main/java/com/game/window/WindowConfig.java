@@ -5,13 +5,13 @@ public class WindowConfig {
     private final int defaultWidth = 500;
     private final int defaultHeight = 500;
 
-    private float defaultFov = (float) Math.toRadians(50f);
+    private final float defaultFov = (float) Math.toRadians(50f);
 
-    private float defaultZNear = 0.05f;
-    private float defaultZFar = 20.f;
-    private String windowName = "GAME_WINDOW";
+    private final float defaultZNear = 0.05f;
+    private final float defaultZFar = 20.f;
+    private final String windowName = "GAME_WINDOW";
 
-    private int swapInterval = 1;
+    private final int swapInterval = 1;
 
     protected float cameraMoveStep = 0.1f;
 

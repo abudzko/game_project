@@ -1,48 +1,29 @@
 package com.game.model;
 
-import org.joml.Vector3f;
+import com.game.model.texture.ModelTexture;
 
-/**
- * Represents model of 3d object:
- * - vertices
- * - positions
- * - rotation
- * - scale
- */
-public class Model {
-    private final int id;
-    private final Vector3f position;
+import java.nio.FloatBuffer;
+
+public interface Model {
     /**
-     * An angles measured in degrees
+     * Vertices of 3D model [x0, y0, z0, x1, y1, z1, ...]<br>
+     * Where x0, y0, z0 is single vertex
      */
-    private final Vector3f rotation;
-    private final float scale;
+    float[] vertices();
 
-    public Model(
-            int id,
-            Vector3f position,
-            Vector3f rotation,
-            float scale
-    ) {
-        this.id = id;
-        this.position = position;
-        this.rotation = rotation;
-        this.scale = scale;
-    }
+    /**
+     * Indexes of vertices forming triangles<br>
+     * Triangle consists of three indexes
+     * Each index represents a single vertex<br>
+     * Vertex consist of three coordinates: x, y, z<br>
+     */
+    int[] indexes();
 
-    public Vector3f getPosition() {
-        return position;
-    }
+    /**
+     * Vertices grouped in triangles. Vertex consist of three float coordinates x, y, z<br>
+     * Triangle consists of three vertices
+     */
+    FloatBuffer triangleVertices();
 
-    public Vector3f getRotation() {
-        return rotation;
-    }
-
-    public float getScale() {
-        return scale;
-    }
-
-    public int getId() {
-        return id;
-    }
+    ModelTexture modelTexture();
 }

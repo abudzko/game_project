@@ -24,9 +24,10 @@ public class Engine implements Runnable {
         while (isRunning) {
             if (!set) {
                 set = true;
-                window.addModel(modelDao.getModel(0));
-                window.addModel(modelDao.getModel(1));
-                window.addModel(modelDao.getModel(2));
+                window.addModel(modelDao.findGameUnit(0));
+                window.addModel(modelDao.findGameUnit(1));
+                window.addModel(modelDao.findGameUnit(2));
+                window.addModel(modelDao.findGameUnit(3));
             }
             if (window.shouldBeClosed()) {
                 break;

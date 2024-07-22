@@ -1,6 +1,7 @@
 package com.game.window;
 
-import com.game.model.Model;
+import com.game.model.GameUnit;
+import com.game.shader.DrawableModel;
 import com.game.shader.Program;
 import com.game.utils.log.LogUtil;
 import com.game.utils.math.Matrix4f;
@@ -26,8 +27,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Window {
     private final WindowConfig windowConfig;
     private final Camera camera;
-    private final ConcurrentHashMap<Integer, Model> modelMap = new ConcurrentHashMap<>();
-    private final HashMap<Integer, DrawableModel> drawableModels = new HashMap<>();
+    private final ConcurrentHashMap<Long, GameUnit> modelMap = new ConcurrentHashMap<>();
+    private final HashMap<Long, DrawableModel> drawableModels = new HashMap<>();
     private int width;
     private int height;
     private long windowId;
@@ -200,8 +201,8 @@ public class Window {
         getProgram().cameraViewMatrixChanged(camera.getLookAtMatrix());
     }
 
-    public void addModel(Model model) {
-        modelMap.put(model.getId(), model);
+    public void addModel(GameUnit gameUnit) {
+        modelMap.put(gameUnit.getId(), gameUnit);
     }
 
     private void updateProjectionMatrix(float aspectRatio) {
