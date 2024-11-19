@@ -1,7 +1,7 @@
 package com.game.shader;
 
 import com.game.utils.log.LogUtil;
-import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,11 +21,11 @@ public class Shader {
     private boolean isDeleted = false;
 
     public Shader(String path, int type) {
-        this.id = GL20.glCreateShader(type);
+        this.id = GL30.glCreateShader(type);
         this.resourcePath = path;
         this.shaderType = type;
-        GL20.glShaderSource(id, resource(path));
-        GL20.glCompileShader(id);
+        GL30.glShaderSource(id, resource(path));
+        GL30.glCompileShader(id);
         if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE) {
             LogUtil.logError(String.format("Failed to compile [%s] shader %s", type, glGetShaderInfoLog(id)));
         }
@@ -40,7 +40,7 @@ public class Shader {
     }
 
     public void deleteShader() {
-        GL20.glDeleteShader(getId());
+        GL30.glDeleteShader(getId());
         isDeleted = true;
     }
 

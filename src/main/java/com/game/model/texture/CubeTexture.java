@@ -60,11 +60,9 @@ public class CubeTexture implements ModelTexture {
     };
 
     private final PngTexture texture;
-    private final FloatBuffer textureVerticesBuffer;
 
     public CubeTexture(String imagePath) {
         this.texture = new PngTexture(imagePath);
-        this.textureVerticesBuffer = BufferUtils.createFloatBuffer(CUBE_TEXTURE_VERTICES);
     }
 
     @Override
@@ -73,7 +71,7 @@ public class CubeTexture implements ModelTexture {
     }
 
     @Override
-    public FloatBuffer textureVerticesBuffer() {
-        return textureVerticesBuffer;
+    public float[] textureVertices() {
+        return CUBE_TEXTURE_VERTICES;
     }
 }
