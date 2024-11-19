@@ -21,10 +21,10 @@ public class DrawableModel {
         this.gameUnit = gameUnit;
         this.vaoId = vaoId;
         this.vertices = vertices;
-        updateWorldMatrix(gameUnit);
+        updateWorldMatrix();
     }
 
-    private void updateWorldMatrix(GameUnit gameUnit) {
+    public void updateWorldMatrix() {
         Matrix4f matrix4f = new Matrix4f();
         matrix4f.translate(gameUnit.getPosition())
                 .rotateX((float) Math.toRadians(gameUnit.getRotation().x))

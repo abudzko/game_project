@@ -4,13 +4,43 @@ import com.game.model.GameUnit;
 import com.game.utils.BufferUtils;
 import com.game.utils.math.Matrix4f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.lwjgl.opengl.GL30.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL30.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL30.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL30.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL30.GL_ELEMENT_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL30.GL_FLOAT;
+import static org.lwjgl.opengl.GL30.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL30.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL30.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL30.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL30.GL_UNSIGNED_INT;
+import static org.lwjgl.opengl.GL30.GL_VERTEX_SHADER;
+import static org.lwjgl.opengl.GL30.glAttachShader;
+import static org.lwjgl.opengl.GL30.glBindBuffer;
+import static org.lwjgl.opengl.GL30.glBindTexture;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glBufferData;
+import static org.lwjgl.opengl.GL30.glClear;
+import static org.lwjgl.opengl.GL30.glCreateProgram;
+import static org.lwjgl.opengl.GL30.glDisableVertexAttribArray;
+import static org.lwjgl.opengl.GL30.glDrawArrays;
+import static org.lwjgl.opengl.GL30.glDrawElements;
+import static org.lwjgl.opengl.GL30.glEnable;
+import static org.lwjgl.opengl.GL30.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL30.glGenBuffers;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.glGetAttribLocation;
+import static org.lwjgl.opengl.GL30.glGetUniformLocation;
+import static org.lwjgl.opengl.GL30.glLinkProgram;
+import static org.lwjgl.opengl.GL30.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL30.glUseProgram;
+import static org.lwjgl.opengl.GL30.glValidateProgram;
+import static org.lwjgl.opengl.GL30.glVertexAttribPointer;
 
 public class Program {
     protected static final int POINT_PER_VERTEX_3D = 3;
@@ -32,18 +62,18 @@ public class Program {
 
     public Program(long windowId) {
         this.windowId = windowId;
-        this.vertexShader = new Shader(SHADER_PATH + "v.vert", GL20.GL_VERTEX_SHADER);
-        this.fragmentShader = new Shader(SHADER_PATH + "f.frag", GL20.GL_FRAGMENT_SHADER);
+        this.vertexShader = new Shader(SHADER_PATH + "v.vert", GL_VERTEX_SHADER);
+        this.fragmentShader = new Shader(SHADER_PATH + "f.frag", GL_FRAGMENT_SHADER);
     }
 
     public void linkProgram() {
-        programId = GL20.glCreateProgram();
+        programId = glCreateProgram();
 
-        GL20.glAttachShader(programId, vertexShader.getId());
-        GL20.glAttachShader(programId, fragmentShader.getId());
+        glAttachShader(programId, vertexShader.getId());
+        glAttachShader(programId, fragmentShader.getId());
 
-        GL20.glLinkProgram(programId);
-        GL20.glValidateProgram(programId);
+        glLinkProgram(programId);
+        glValidateProgram(programId);
 
         releaseResources();
     }
@@ -51,32 +81,32 @@ public class Program {
     public void render(Iterable<DrawableModel> models) {
         GLFW.glfwSwapBuffers(windowId);
 
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
         enable();
-        var locationAttribute = GL20.glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
-        var textureAttribute = GL20.glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
+        var locationAttribute = glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
+        var textureAttribute = glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
 
         for (var drawableModel : models) {
             setUniformMatrix4f(WORLD_MATRIX_NAME, drawableModel.getWorldMatrix());
             // Bind to the VAO
-            GL30.glBindVertexArray(drawableModel.getVaoId());
+            glBindVertexArray(drawableModel.getVaoId());
 
             // Enable Texture
-            GL20.glEnableVertexAttribArray(textureAttribute);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, drawableModel.getTextureId());
+            glEnableVertexAttribArray(textureAttribute);
+            glBindTexture(GL_TEXTURE_2D, drawableModel.getTextureId());
 
             // Draw the vertices
-            GL20.glEnableVertexAttribArray(locationAttribute);
+            glEnableVertexAttribArray(locationAttribute);
             int verticesCount = drawableModel.getVertices().limit() / POINT_PER_VERTEX_3D;
-            GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, verticesCount);
+            glDrawArrays(GL_TRIANGLES, 0, verticesCount);
 
-            // Restore state
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-            GL20.glDisableVertexAttribArray(textureAttribute);
-            GL20.glDisableVertexAttribArray(locationAttribute);
-            GL30.glBindVertexArray(0);
+            // Clean resources
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisableVertexAttribArray(textureAttribute);
+            glDisableVertexAttribArray(locationAttribute);
+            glBindVertexArray(0);
         }
 
         if (cameraViewMatrixChanged) {
@@ -93,32 +123,29 @@ public class Program {
     public void renderV2(Iterable<DrawableModel> models) {
         GLFW.glfwSwapBuffers(windowId);
 
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
         enable();
-        var locationAttribute = GL20.glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
-        var textureAttribute = GL20.glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
+        var locationAttribute = glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
+        var textureAttribute = glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
 
         for (var drawableModel : models) {
             setUniformMatrix4f(WORLD_MATRIX_NAME, drawableModel.getWorldMatrix());
-            // Bind to the VAO
-            GL30.glBindVertexArray(drawableModel.getVaoId());
 
             // Enable Texture
-            GL20.glEnableVertexAttribArray(textureAttribute);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, drawableModel.getTextureId());
+            glEnableVertexAttribArray(textureAttribute);
+            glBindTexture(GL_TEXTURE_2D, drawableModel.getTextureId());
 
             // Draw the vertices
-            GL20.glEnableVertexAttribArray(locationAttribute);
+            glEnableVertexAttribArray(locationAttribute);
             int verticesCount = drawableModel.getVertices().limit() / POINT_PER_VERTEX_3D;
-            GL11.glDrawElements(GL11.GL_TRIANGLES, verticesCount, GL11.GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, verticesCount, GL_UNSIGNED_INT, 0);
 
-            // Restore state
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-            GL20.glDisableVertexAttribArray(textureAttribute);
-            GL20.glDisableVertexAttribArray(locationAttribute);
-            GL30.glBindVertexArray(0);
+            // Clean resources
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glDisableVertexAttribArray(textureAttribute);
+            glDisableVertexAttribArray(locationAttribute);
         }
 
         if (cameraViewMatrixChanged) {
@@ -133,77 +160,76 @@ public class Program {
     }
 
     public DrawableModel createDrawableModel(GameUnit gameUnit) {
-        int vaoId = GL30.glGenVertexArrays();
-        GL30.glBindVertexArray(vaoId);
+        int vaoId = glGenVertexArrays();
+        glBindVertexArray(vaoId);
 
         // Vertices
         var vertices = gameUnit.getModel().triangleVertices();
-        int verticesVboId = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, verticesVboId);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_STATIC_DRAW);
+        int verticesVboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, verticesVboId);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
 
-        var locationAttribute = GL20.glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
-        GL20.glVertexAttribPointer(locationAttribute, POINT_PER_VERTEX_3D, GL11.GL_FLOAT, false, 0, 0);
+        var locationAttribute = glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
+        glVertexAttribPointer(locationAttribute, POINT_PER_VERTEX_3D, GL_FLOAT, false, 0, 0);
 
         // Unbind the VBO
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         MemoryUtil.memFree(vertices);
 
         // Textures
-
-        int textureVboId = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, textureVboId);
-        var textureVertices = gameUnit.getModel().modelTexture().textureVerticesBuffer();
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureVertices, GL15.GL_STATIC_DRAW);
-        var textureAttribute = GL20.glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
-        GL20.glVertexAttribPointer(textureAttribute, 2, GL11.GL_FLOAT, false, 0, 0);
+        int textureVboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, textureVboId);
+        var textureVertices = BufferUtils.createFloatBuffer(gameUnit.getModel().modelTexture().textureVertices());
+        glBufferData(GL_ARRAY_BUFFER, textureVertices, GL_STATIC_DRAW);
+        var textureAttribute = glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
+        glVertexAttribPointer(textureAttribute, 2, GL_FLOAT, false, 0, 0);
         // Unbind the VBO
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         MemoryUtil.memFree(textureVertices);
 
         // Unbind the VAO
-        GL30.glBindVertexArray(0);
+        glBindVertexArray(0);
         return new DrawableModel(gameUnit, vaoId, vertices);
     }
 
     public DrawableModel createDrawableModelV2(GameUnit gameUnit) {
-        int vaoId = GL30.glGenVertexArrays();
-        GL30.glBindVertexArray(vaoId);
+        int vaoId = glGenVertexArrays();
+        glBindVertexArray(vaoId);
 
         // Vertices
         var vertices = gameUnit.getModel().triangleVertices();
-        int verticesVboId = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, verticesVboId);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_STATIC_DRAW);
-        var locationAttribute = GL20.glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
-        GL20.glVertexAttribPointer(locationAttribute, POINT_PER_VERTEX_3D, GL11.GL_FLOAT, false, 0, 0);
+        int verticesVboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, verticesVboId);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+        var locationAttribute = glGetAttribLocation(getProgramId(), LOCATION_ATTRIBUTE_NAME);
+        glVertexAttribPointer(locationAttribute, POINT_PER_VERTEX_3D, GL_FLOAT, false, 0, 0);
         // Unbind vertexes VBO
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         MemoryUtil.memFree(vertices);
 
         // Indexes
-        int indexVboId = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, indexVboId);
+        int indexVboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, indexVboId);
         var indexes = BufferUtils.createIntBuffer(new int[0]);
-        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indexes, GL15.GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes, GL_STATIC_DRAW);
         // Unbind the indexes VBO
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         MemoryUtil.memFree(indexes);
 
         // Textures
         var texture = gameUnit.getModel().modelTexture();
-        int textureVboId = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, textureVboId);
-        var textureVertices = texture.textureVerticesBuffer();
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureVertices, GL15.GL_STATIC_DRAW);
-        var textureAttribute = GL20.glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
-        GL20.glVertexAttribPointer(textureAttribute, 2, GL11.GL_FLOAT, false, 0, 0);
+        int textureVboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, textureVboId);
+        var textureVertices = BufferUtils.createFloatBuffer(texture.textureVertices());
+        glBufferData(GL_ARRAY_BUFFER, textureVertices, GL_STATIC_DRAW);
+        var textureAttribute = glGetAttribLocation(getProgramId(), TEXTURE_ATTRIBUTE_NAME);
+        glVertexAttribPointer(textureAttribute, 2, GL_FLOAT, false, 0, 0);
         // Unbind textures VBO
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         MemoryUtil.memFree(textureVertices);
 
         // Unbind the VAO
-        GL30.glBindVertexArray(0);
+        glBindVertexArray(0);
         return new DrawableModel(gameUnit, vaoId, vertices);
     }
 
@@ -223,7 +249,7 @@ public class Program {
     }
 
     private void setUniformMatrix4f(String name, Matrix4f matrix4f) {
-        GL20.glUniformMatrix4fv(
+        glUniformMatrix4fv(
                 getUniformIdBy(name),
                 false,
                 matrix4f.toFloatBuffer()
@@ -232,7 +258,7 @@ public class Program {
 
     private int getUniformIdBy(String uniformName) {
         return uniformCache.computeIfAbsent(uniformName, name -> {
-            var uniformId = GL20.glGetUniformLocation(programId, uniformName);
+            var uniformId = glGetUniformLocation(programId, uniformName);
             if (uniformId == -1) {
                 throw new IllegalArgumentException(String.format(
                         "Could not find uniform location by name: %s",
@@ -248,10 +274,10 @@ public class Program {
     }
 
     private void enable() {
-        GL20.glUseProgram(programId);
+        glUseProgram(programId);
     }
 
     private void disable() {
-        GL20.glUseProgram(0);
+        glUseProgram(0);
     }
 }

@@ -1,6 +1,6 @@
 package com.game.window.events;
 
-import com.game.dao.ModelDao;
+import com.game.dao.GameUnitDao;
 import com.game.utils.BufferUtils;
 import com.game.utils.log.LogUtil;
 import com.game.window.Window;
@@ -20,7 +20,7 @@ import static org.lwjgl.opengl.GL11.glViewport;
 public class WindowEvents {
     private final Window window;
 
-    private final ModelDao modelDao = new ModelDao();
+    private final GameUnitDao gameUnitDao = new GameUnitDao();
     private final float moveStep = 0.05f;
 
     public WindowEvents(Window window) {
@@ -178,18 +178,22 @@ public class WindowEvents {
      * TODO This logic should be in event listeners
      */
     private void moveX(float stepX) {
-        var model = modelDao.findGameUnit(1);
-        model.getPosition().x += stepX;
-        window.addModel(model);
+        var gameUnit = gameUnitDao.getMainUnit();
+        System.out.println("X: " + gameUnit.getPosition().x);
+        gameUnit.getPosition().x += stepX;
+        //TODO just redraw model
+        window.addGameUnit(gameUnit);
     }
 
     /**
      * TODO This logic should be in event listeners
      */
     private void moveZ(float stepZ) {
-        var model = modelDao.findGameUnit(1);
-        model.getPosition().z += stepZ;
-        window.addModel(model);
+        var gameUnit = gameUnitDao.getMainUnit();
+        System.out.println("Z: " + gameUnit.getPosition().z);
+        gameUnit.getPosition().z += stepZ;
+        //TODO just redraw model
+        window.addGameUnit(gameUnit);
     }
 
 }

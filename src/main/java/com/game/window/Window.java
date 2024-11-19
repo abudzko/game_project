@@ -10,8 +10,10 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
@@ -27,8 +29,9 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Window {
     private final WindowConfig windowConfig;
     private final Camera camera;
-    private final ConcurrentHashMap<Long, GameUnit> modelMap = new ConcurrentHashMap<>();
-    private final HashMap<Long, DrawableModel> drawableModels = new HashMap<>();
+    private final Queue<GameUnit> gameUnits = new ConcurrentLinkedQueue<>() {
+    };
+    private final Map<Long, DrawableModel> drawableModels = new ConcurrentHashMap<>();
     private int width;
     private int height;
     private long windowId;
@@ -86,7 +89,7 @@ public class Window {
 
         setWindowHints();
 
-        windowId = org.lwjgl.glfw.GLFW.glfwCreateWindow(
+        windowId = GLFW.glfwCreateWindow(
                 width,
                 height,
                 windowConfig.getWindowName(),
@@ -136,12 +139,13 @@ public class Window {
     }
 
     private void readFreshModels() {
-        if (modelMap.size() > 0) {// TODO rework
-            var iterator = modelMap.values().iterator();
-            while (iterator.hasNext()) {
-                var model = iterator.next();
-                drawableModels.put(model.getId(), getProgram().createDrawableModel(model));
-                iterator.remove();
+        while (!gameUnits.isEmpty()) {
+            var gameUnit = gameUnits.poll();
+            var drawableModel = drawableModels.get(gameUnit.getId());
+            if (drawableModel == null) {
+                drawableModels.put(gameUnit.getId(), getProgram().createDrawableModel(gameUnit));
+            } else {
+                drawableModel.updateWorldMatrix();
             }
         }
     }
@@ -201,8 +205,8 @@ public class Window {
         getProgram().cameraViewMatrixChanged(camera.getLookAtMatrix());
     }
 
-    public void addModel(GameUnit gameUnit) {
-        modelMap.put(gameUnit.getId(), gameUnit);
+    public void addGameUnit(GameUnit gameUnit) {
+        gameUnits.add(gameUnit);
     }
 
     private void updateProjectionMatrix(float aspectRatio) {
