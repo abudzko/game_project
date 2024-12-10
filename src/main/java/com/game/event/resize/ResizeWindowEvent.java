@@ -1,11 +1,11 @@
-package com.game.window.events;
+package com.game.event.resize;
 
-public class WindowResizeEvent {
+public class ResizeWindowEvent {
 
     private final int newWidth;
     private final int newHeight;
 
-    public WindowResizeEvent(int newWidth, int newHeight) {
+    public ResizeWindowEvent(int newWidth, int newHeight) {
         this.newWidth = newWidth;
         this.newHeight = newHeight;
     }

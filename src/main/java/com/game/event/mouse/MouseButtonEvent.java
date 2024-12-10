@@ -1,13 +1,13 @@
-package com.game.window.events;
+package com.game.event.mouse;
 
-public class MouseEvent {
-    private final int button;
-    private final int action;
+public class MouseButtonEvent {
+    private final MouseButton button;
+    private final MouseButtonAction action;
     private final int mods;
     private final double x;
     private final double y;
 
-    public MouseEvent(int button, int action, int mods, double x, double y) {
+    public MouseButtonEvent(MouseButton button, MouseButtonAction action, int mods, double x, double y) {
         this.button = button;
         this.action = action;
         this.mods = mods;
@@ -15,11 +15,11 @@ public class MouseEvent {
         this.y = y;
     }
 
-    public int getButton() {
+    public MouseButton getButton() {
         return button;
     }
 
-    public int getAction() {
+    public MouseButtonAction getAction() {
         return action;
     }
 

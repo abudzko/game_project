@@ -1,4 +1,4 @@
-package com.game.window.events;
+package com.game.event.scroll;
 
 public class ScrollEvent {
 

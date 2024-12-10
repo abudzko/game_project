@@ -36,7 +36,7 @@ public class SkyManualModel implements Model {
 
     @Override
     public FloatBuffer triangleVertices() {
-        return BufferUtils.createFloatBuffer(SKY_VERTICES);
+        return BufferUtils.createFloatBuffer4f(SKY_VERTICES);
     }
 
     @Override

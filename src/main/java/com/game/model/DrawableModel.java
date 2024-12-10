@@ -1,7 +1,6 @@
-package com.game.shader;
+package com.game.model;
 
-import com.game.model.GameUnit;
-import com.game.utils.math.Matrix4f;
+import org.joml.Matrix4f;
 
 import java.nio.FloatBuffer;
 

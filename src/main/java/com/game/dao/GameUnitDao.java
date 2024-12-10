@@ -13,8 +13,8 @@ import java.util.Random;
 
 public class GameUnitDao {
     protected static final Random RANDOM = new Random();
-    private static final List<GameUnit> UNITS = createUnits();
     private static final long MAIN_UNIT_ID = 0;
+    private static final List<GameUnit> UNITS = createUnits();
     private static final GameUnit MAIN_UNIT = createMainUnit();
 
     private static List<GameUnit> createUnits() {
@@ -33,26 +33,30 @@ public class GameUnitDao {
                 10f,
                 new SkyManualModel()
         );
-        var unit3 = new GameUnit(
-                3,
-                new Vector3f(-.5f, .5f, 0f),
-                new Vector3f(0f, 0f, 0f),
-                0.05f,
-                new ObjModel("src/main/resources/obj/tor.obj")
-        );
+        var unit3 = createCudeGameUnit(new Vector3f(0f, 0f, 0f));
         gameUnits.add(unit1);
         gameUnits.add(unit2);
         gameUnits.add(unit3);
         return gameUnits;
     }
 
+    public static GameUnit createCudeGameUnit(Vector3f position) {
+        return new GameUnit(
+                RANDOM.nextLong(),
+                position,
+                new Vector3f(0f, 0f, 0f),
+                0.1f,
+                new CubeManualModel()
+        );
+    }
+
     private static GameUnit createMainUnit() {
         return new GameUnit(
                 MAIN_UNIT_ID,
+                new Vector3f(0f, 0.5f, 0f),
                 new Vector3f(0f, 0f, 0f),
-                new Vector3f(0f, 0f, 0f),
-                0.05f,
-                new CubeManualModel()
+                0.1f,
+                new ObjModel("src/main/resources/obj/monkey.obj")
         );
     }
 
@@ -68,10 +72,10 @@ public class GameUnitDao {
         long id = RANDOM.nextLong();
         return new GameUnit(
                 id,
+                new Vector3f(0f, 0.5f, 0f),
                 new Vector3f(0f, 0f, 0f),
-                new Vector3f(0f, 0f, 0f),
-                0.05f,
-                new CubeManualModel()
+                0.1f,
+                new ObjModel("src/main/resources/obj/tor1.obj")
         );
     }
 }

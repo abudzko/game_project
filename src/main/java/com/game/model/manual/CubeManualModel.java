@@ -61,10 +61,6 @@ public class CubeManualModel implements Model {
 
     private ModelTexture modelTexture;
 
-    public CubeManualModel() {
-
-    }
-
     @Override
     public float[] vertices() {
         throw new UnsupportedOperationException("Not implemented");
@@ -77,13 +73,13 @@ public class CubeManualModel implements Model {
 
     @Override
     public FloatBuffer triangleVertices() {
-        return BufferUtils.createFloatBuffer(CUBE_VERTICES);
+        return BufferUtils.createFloatBuffer4f(CUBE_VERTICES);
     }
 
     @Override
     public ModelTexture modelTexture() {
         if (modelTexture == null) {
-            modelTexture = new CubeTexture("/texture/cat512.png");
+            modelTexture = new CubeTexture("/texture/any.png");
         }
         return modelTexture;
     }

@@ -20,10 +20,6 @@ public class GroundManualModel implements Model {
 
     private ModelTexture modelTexture;
 
-    public GroundManualModel() {
-
-    }
-
     @Override
     public float[] vertices() {
         throw new UnsupportedOperationException("Not implemented");
@@ -36,7 +32,7 @@ public class GroundManualModel implements Model {
 
     @Override
     public FloatBuffer triangleVertices() {
-        return BufferUtils.createFloatBuffer(GROUND_VERTICES);
+        return BufferUtils.createFloatBuffer4f(GROUND_VERTICES);
     }
 
     @Override

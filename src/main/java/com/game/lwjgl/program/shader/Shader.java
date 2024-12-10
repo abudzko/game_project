@@ -1,4 +1,4 @@
-package com.game.shader;
+package com.game.lwjgl.program.shader;
 
 import com.game.utils.log.LogUtil;
 import org.lwjgl.opengl.GL30;

@@ -7,6 +7,7 @@ public class LogUtil {
 
     public static void logError(String message, Exception ex) {
         System.out.println(message);
+        ex.printStackTrace();
     }
 
     public static void logError(String message) {

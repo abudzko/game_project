@@ -8,7 +8,7 @@ public class WindowConfig {
     private final float defaultFov = (float) Math.toRadians(50f);
 
     private final float defaultZNear = 0.05f;
-    private final float defaultZFar = 20.f;
+    private final float defaultZFar = 30.f;
     private final String windowName = "GAME_WINDOW";
 
     private final int swapInterval = 1;

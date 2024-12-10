@@ -1,22 +1,27 @@
-package com.game.shader;
+package com.game.lwjgl.texture;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
 import org.lwjgl.opengl.GL30;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class PngTexture {
+public class TextureDao {
+    private final ConcurrentHashMap<String, Integer> textures = new ConcurrentHashMap<>();
 
-    private final String imagePath;
-    private Integer textureId;
-
-    public PngTexture(String imagePath) {
-        this.imagePath = imagePath;
-        loadTexture();
+    public Integer getTexture(String textureKey) {
+        return textures.computeIfAbsent(textureKey, this::loadTexture);
     }
 
-    private void loadTexture() {
+    private void deleteTexture(String textureKey) {
+        var id = textures.remove(textureKey);
+        if (id != null) {
+            GL30.glDeleteTextures(id);
+        }
+    }
+
+    private Integer loadTexture(String imagePath) {
         try {
             // Load png file
             var decoder = new PNGDecoder(getClass().getResourceAsStream(imagePath));
@@ -55,16 +60,9 @@ public class PngTexture {
             );
 
             GL30.glBindTexture(GL30.GL_TEXTURE_2D, 0);
-            textureId = id;
+            return id;
         } catch (IOException e) {
-            throw new IllegalStateException(String.format("Failed to load image %s", imagePath));
+            throw new IllegalStateException(String.format("Failed to load texture by path %s", imagePath));
         }
-    }
-
-    public int getTextureId() {
-        if (textureId == null) {
-            throw new IllegalStateException(String.format("Texture [%s] was not loaded", imagePath));
-        }
-        return textureId;
     }
 }

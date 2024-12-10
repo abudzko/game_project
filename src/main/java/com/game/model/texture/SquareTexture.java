@@ -1,6 +1,6 @@
 package com.game.model.texture;
 
-import com.game.shader.PngTexture;
+import com.game.lwjgl.texture.PngTexture;
 
 /**
  * Manually created texture

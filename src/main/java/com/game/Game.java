@@ -1,6 +1,7 @@
 package com.game;
 
 import com.game.engine.Engine;
+import com.game.model.GameUnit;
 import com.game.window.Window;
 import com.game.window.WindowConfig;
 
@@ -22,7 +23,7 @@ public class Game {
 
     public void start() {
         try {
-            window.start();
+            window.awaitOfLaunch();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);

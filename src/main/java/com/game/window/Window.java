@@ -1,14 +1,31 @@
 package com.game.window;
 
 import com.game.model.GameUnit;
-import com.game.shader.DrawableModel;
-import com.game.shader.Program;
+import com.game.model.DrawableModel;
+import com.game.lwjgl.program.Program;
 import com.game.utils.log.LogUtil;
-import com.game.utils.math.Matrix4f;
-import com.game.window.events.WindowEvents;
+import com.game.window.camera.Camera;
+import com.game.window.camera.CameraContext;
+import com.game.window.camera.CameraEventHandler;
+import com.game.window.camera.CameraState;
+import com.game.window.camera.world.CameraToWorldConverter;
+import com.game.window.camera.world.GroundIntersection;
+import com.game.event.resize.ResizeWindowEvent;
+import com.game.event.scroll.ScrollEvent;
+import com.game.lwjgl.event.WindowEventManager;
+import com.game.event.key.KeyEvent;
+import com.game.event.listener.EventListener;
+import com.game.event.listener.KeyEventListener;
+import com.game.event.listener.MouseButtonEventListener;
+import com.game.event.listener.ResizeWindowEventListener;
+import com.game.event.listener.ScrollEventListener;
+import com.game.event.mouse.MouseButtonEvent;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL30;
 
 import java.util.Map;
 import java.util.Queue;
@@ -26,25 +43,24 @@ import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class Window {
+public class Window implements KeyEventListener, MouseButtonEventListener, ScrollEventListener, ResizeWindowEventListener {
     private final WindowConfig windowConfig;
-    private final Camera camera;
-    private final Queue<GameUnit> gameUnits = new ConcurrentLinkedQueue<>() {
-    };
+    private final Queue<GameUnit> gameUnits = new ConcurrentLinkedQueue<>();
     private final Map<Long, DrawableModel> drawableModels = new ConcurrentHashMap<>();
     private int width;
     private int height;
     private long windowId;
     private Program program;
+    private Camera camera;
+    private WindowEventManager windowEventManager;
 
     public Window(WindowConfig windowConfig) {
         this.windowConfig = windowConfig;
         this.width = windowConfig.getDefaultWidth();
         this.height = windowConfig.getDefaultHeight();
-        this.camera = new Camera();
     }
 
-    public void start() throws InterruptedException {
+    public void awaitOfLaunch() throws InterruptedException {
         var countDownLaunch = new CountDownLatch(1);
         var windowRunnable = new Runnable() {
             @Override
@@ -54,13 +70,14 @@ public class Window {
                     init();
                     show();
                     createProgram();
+                    createCamera();
                     countDownLaunch.countDown();
                     while (!shouldBeClosed()) {
-                        GLFW.glfwPollEvents();
+                        windowEventManager.processPendingEvents();
                         render();
                     }
                 } catch (RuntimeException e) {
-                    LogUtil.logError(String.format("Error happened inside window [%s] thread. %s", windowId, e.getMessage()));
+                    LogUtil.logError(String.format("Error happened inside window [%s] thread", windowId), e);
                 } finally {
                     destroy();
                 }
@@ -107,14 +124,25 @@ public class Window {
 
         GLFW.glfwSwapInterval(windowConfig.getSwapInterval());
 
-        new WindowEvents(this).attachEvents();
+        windowEventManager = new WindowEventManager(getWindowId());
+        windowEventManager.configureEventCallbacks();
+        addEventListener(this);
     }
 
     private void createProgram() {
         program = new Program(windowId);
-        var aspectRatio = (float) getWidth() / (float) getHeight();
-        updateProjectionMatrix(aspectRatio);
+        updateProjectionMatrix();
         getProgram().linkProgram();
+    }
+
+    private void createCamera() {
+        var cameraContext = new CameraContext();
+        cameraContext.setMoveStep(windowConfig.getCameraMoveStep());
+        cameraContext.setProgram(getProgram());
+        cameraContext.setCameraState(new CameraState());
+        this.camera = new Camera(cameraContext);
+        CameraEventHandler cameraEventHandler = new CameraEventHandler(cameraContext);
+        addEventListener(cameraEventHandler);
         cameraChanged();
     }
 
@@ -178,27 +206,11 @@ public class Window {
         return glfwWindowShouldClose(windowId);
     }
 
-    public void windowSizeChanged(int newWidth, int newHeight) {
+    private void windowSizeChanged(int newWidth, int newHeight) {
         width = newWidth;
         height = newHeight;
-        var aspectRatio = (float) width / (float) height;
-        updateProjectionMatrix(aspectRatio);
+        updateProjectionMatrix();
         getProgram().cameraViewMatrixChanged(camera.getLookAtMatrix());
-    }
-
-    public void moveCameraX(float step) {
-        camera.moveX(step);
-        cameraChanged();
-    }
-
-    public void moveCameraY(float step) {
-        camera.moveY(step);
-        cameraChanged();
-    }
-
-    public void moveCameraZ(float step) {
-        camera.moveZ(step);
-        cameraChanged();
     }
 
     private void cameraChanged() {
@@ -209,7 +221,13 @@ public class Window {
         gameUnits.add(gameUnit);
     }
 
-    private void updateProjectionMatrix(float aspectRatio) {
+    private void updateProjectionMatrix() {
+        var projectionMatrix = createProjectionMatrix();
+        getProgram().projectionMatrixChanged(projectionMatrix);
+    }
+
+    private Matrix4f createProjectionMatrix() {
+        var aspectRatio = (float) getWidth() / (float) getHeight();
         var projectionMatrix = new Matrix4f();
         projectionMatrix.perspective(
                 windowConfig.getDefaultFov(),
@@ -217,10 +235,43 @@ public class Window {
                 windowConfig.getDefaultZNear(),
                 windowConfig.getDefaultZFar()
         );
-        getProgram().projectionMatrixChanged(projectionMatrix);
+        return projectionMatrix;
     }
 
-    public WindowConfig getWindowConfig() {
-        return windowConfig;
+    @Override
+    public void event(KeyEvent keyEvent) {
+
+    }
+
+    @Override
+    public void event(MouseButtonEvent mouseButtonEvent) {
+    }
+
+    // TODO ??
+    public Vector3f getWorldCoordinates(MouseButtonEvent mouseButtonEvent){
+        var projectionMatrix = createProjectionMatrix();
+        var c = new CameraToWorldConverter(mouseButtonEvent, projectionMatrix, camera.getLookAtMatrix());
+        var rayVector = c.rayVector();
+        LogUtil.log(String.valueOf(camera.getLookAtMatrix()));
+        var cameraState = camera.getCameraState();
+        var cameraPosition = new Vector3f(cameraState.eyeX, cameraState.eyeY, cameraState.eyeZ);
+        var wordCoordinates = new GroundIntersection(cameraPosition).findPoint(rayVector);
+        LogUtil.log(String.format("wordCoordinates: X = %s, Y = %s, Z = %s", wordCoordinates.x, wordCoordinates.y, wordCoordinates.z));
+        return wordCoordinates;
+    }
+
+    @Override
+    public void event(ResizeWindowEvent resizeWindowEvent) {
+        GL30.glViewport(0, 0, resizeWindowEvent.getNewWidth(), resizeWindowEvent.getNewHeight());
+        windowSizeChanged(resizeWindowEvent.getNewWidth(), resizeWindowEvent.getNewHeight());
+    }
+
+    @Override
+    public void event(ScrollEvent scrollEvent) {
+
+    }
+
+    public void addEventListener(EventListener eventListener) {
+        windowEventManager.addEventListener(eventListener);
     }
 }

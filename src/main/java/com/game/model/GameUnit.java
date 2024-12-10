@@ -1,5 +1,7 @@
 package com.game.model;
 
+import com.game.event.key.KeyEvent;
+import com.game.event.listener.KeyEventListener;
 import org.joml.Vector3f;
 
 /**
@@ -8,7 +10,7 @@ import org.joml.Vector3f;
  * - rotation
  * - scale
  */
-public class GameUnit {
+public class GameUnit implements KeyEventListener {
     private final long id;
     private final Vector3f position;
     /**
@@ -51,5 +53,10 @@ public class GameUnit {
 
     public Model getModel() {
         return model;
+    }
+
+    @Override
+    public void event(KeyEvent keyEvent) {
+
     }
 }
