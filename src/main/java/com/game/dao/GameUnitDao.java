@@ -14,8 +14,8 @@ import java.util.Random;
 public class GameUnitDao {
     protected static final Random RANDOM = new Random();
     private static final long MAIN_UNIT_ID = 0;
-    private static final List<GameUnit> UNITS = createUnits();
-    private static final GameUnit MAIN_UNIT = createMainUnit();
+    private final List<GameUnit> UNITS = createUnits();
+    private final GameUnit MAIN_UNIT = createMainUnit();
 
     private static List<GameUnit> createUnits() {
         var gameUnits = new ArrayList<GameUnit>();

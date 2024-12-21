@@ -1,33 +1,24 @@
 package com.game;
 
 import com.game.engine.Engine;
-import com.game.model.GameUnit;
-import com.game.window.Window;
-import com.game.window.WindowConfig;
+import com.game.window.WindowContainer;
 
 public class Game {
 
-    private final Window window;
-
-    private final Engine engine;
-
     public Game() {
-        var windowConfig = new WindowConfig();
-        window = new Window(windowConfig);
-        engine = new Engine(window);
-    }
-
-    public static void main(String[] args) {
-        new Game();
     }
 
     public void start() {
+        var windowContainer = new WindowContainer();
         try {
-            window.awaitOfLaunch();
+            windowContainer.startWindows();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
-        new Thread(engine).start();
+        windowContainer.getWindows().forEach((id, window) -> {
+            var engine = new Engine(window);
+            new Thread(engine).start();
+        });
     }
 }

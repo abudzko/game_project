@@ -1,15 +1,11 @@
 package com.game.lwjgl.program;
 
-import com.game.model.GameUnit;
-import com.game.model.DrawableModel;
 import com.game.lwjgl.program.shader.Shader;
+import com.game.model.DrawableModel;
+import com.game.model.GameUnit;
 import com.game.utils.BufferUtils;
 import org.joml.Matrix4f;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.system.MemoryUtil;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.lwjgl.opengl.GL30.GL_ARRAY_BUFFER;
@@ -31,7 +27,6 @@ import static org.lwjgl.opengl.GL30.glClear;
 import static org.lwjgl.opengl.GL30.glCreateProgram;
 import static org.lwjgl.opengl.GL30.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL30.glDrawArrays;
-import static org.lwjgl.opengl.GL30.glDrawElements;
 import static org.lwjgl.opengl.GL30.glEnable;
 import static org.lwjgl.opengl.GL30.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL30.glGenBuffers;
@@ -56,23 +51,22 @@ public class Program {
     private final Shader vertexShader;
     private final Shader fragmentShader;
     private final ConcurrentHashMap<String, Integer> uniformCache = new ConcurrentHashMap<>();
-    private final long windowId;
-    private Matrix4f cameraViewMatrix;
-    private boolean cameraViewMatrixChanged = false;
-    private Matrix4f projectionMatrix;
-    private boolean projectionMatrixChanged = false;
+    //    private Matrix4f cameraViewMatrix;
+//    private boolean cameraViewMatrixChanged = false;
+//    private Matrix4f projectionMatrix;
+//    private boolean projectionMatrixChanged = false;
     private int programId;
     private Integer positionAttributeId;
     private Integer textureAttributeId;
     private Integer normalAttributeId;
 
-    public Program(long windowId) {
-        this.windowId = windowId;
+    public Program() {
         this.vertexShader = new Shader(SHADER_PATH + "v.vert", GL_VERTEX_SHADER);
         this.fragmentShader = new Shader(SHADER_PATH + "f.frag", GL_FRAGMENT_SHADER);
+        linkProgram();
     }
 
-    public void linkProgram() {
+    private void linkProgram() {
         programId = glCreateProgram();
 
         glAttachShader(programId, vertexShader.getId());
@@ -84,15 +78,13 @@ public class Program {
         releaseResources();
     }
 
-    public void render(Iterable<DrawableModel> models) {
-        GLFW.glfwSwapBuffers(windowId);
-
+    public void render(RenderObjects renderObjects) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
         enable();
 
-        for (var drawableModel : models) {
+        for (var drawableModel : renderObjects.getModels()) {
             setUniformMatrix4f(WORLD_MATRIX_NAME, drawableModel.getWorldMatrix());
             // Bind to the VAO
             glBindVertexArray(drawableModel.getVaoId());
@@ -114,13 +106,13 @@ public class Program {
             glBindVertexArray(0);
         }
 
-        if (cameraViewMatrixChanged) {
-            setUniformMatrix4f(CAMERA_VIEW_MATRIX_NAME, cameraViewMatrix);
-            cameraViewMatrixChanged = false;
+        if (renderObjects.getCameraViewMatrix() != null) {
+            setUniformMatrix4f(CAMERA_VIEW_MATRIX_NAME, renderObjects.getCameraViewMatrix());
+//            cameraViewMatrixChanged = false;
         }
-        if (projectionMatrixChanged) {
-            setUniformMatrix4f(PROJECTION_MATRIX_NAME, projectionMatrix);
-            projectionMatrixChanged = false;
+        if (renderObjects.getProjectionMatrix() != null) {
+            setUniformMatrix4f(PROJECTION_MATRIX_NAME, renderObjects.getProjectionMatrix());
+//            projectionMatrixChanged = false;
         }
         disable();
     }
@@ -195,15 +187,15 @@ public class Program {
         fragmentShader.deleteShader();
     }
 
-    public void cameraViewMatrixChanged(Matrix4f cameraViewMatrix) {
-        this.cameraViewMatrix = cameraViewMatrix;
-        this.cameraViewMatrixChanged = true;
-    }
-
-    public void projectionMatrixChanged(Matrix4f projectionMatrix) {
-        this.projectionMatrix = projectionMatrix;
-        this.projectionMatrixChanged = true;
-    }
+//    public void cameraViewMatrixChanged(Matrix4f cameraViewMatrix) {
+//        this.cameraViewMatrix = cameraViewMatrix;
+//        this.cameraViewMatrixChanged = true;
+//    }
+//
+//    public void projectionMatrixChanged(Matrix4f projectionMatrix) {
+//        this.projectionMatrix = projectionMatrix;
+//        this.projectionMatrixChanged = true;
+//    }
 
     private void setUniformMatrix4f(String name, Matrix4f matrix4f) {
         var floatBuffer = BufferUtils.toFloatBuffer(matrix4f);

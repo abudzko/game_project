@@ -1,7 +1,7 @@
 package com.game.model;
 
-import com.game.event.key.KeyEvent;
-import com.game.event.listener.KeyEventListener;
+import com.game.event.window.key.KeyEvent;
+import com.game.event.window.listener.KeyEventListener;
 import org.joml.Vector3f;
 
 /**

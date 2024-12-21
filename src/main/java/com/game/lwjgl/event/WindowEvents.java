@@ -1,16 +1,17 @@
 package com.game.lwjgl.event;
 
-import com.game.event.cursor.CursorPositionEvent;
-import com.game.event.key.KeyEvent;
-import com.game.event.listener.CursorPositionEventListener;
-import com.game.event.listener.EventListener;
-import com.game.event.listener.KeyEventListener;
-import com.game.event.listener.MouseButtonEventListener;
-import com.game.event.listener.ResizeWindowEventListener;
-import com.game.event.listener.ScrollEventListener;
-import com.game.event.mouse.MouseButtonEvent;
-import com.game.event.resize.ResizeWindowEvent;
-import com.game.event.scroll.ScrollEvent;
+import com.game.event.window.cursor.CursorPositionEvent;
+import com.game.event.window.key.KeyEvent;
+import com.game.event.window.listener.CursorPositionEventListener;
+import com.game.event.window.listener.EventListener;
+import com.game.event.window.listener.KeyEventListener;
+import com.game.event.window.listener.MouseButtonEventListener;
+import com.game.event.window.listener.ResizeWindowEventListener;
+import com.game.event.window.listener.ScrollEventListener;
+import com.game.event.window.mouse.MouseButtonEvent;
+import com.game.event.window.resize.ResizeWindowEvent;
+import com.game.event.window.scroll.ScrollEvent;
+import com.game.lwjgl.annotation.LwjglMainThread;
 import com.game.utils.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorEnterCallback;
@@ -23,7 +24,7 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class WindowEventManager {
+public class WindowEvents {
     private final Long windowId;
 
     private final List<MouseButtonEventListener> mouseButtonEventListeners = new CopyOnWriteArrayList<>();
@@ -32,30 +33,27 @@ public class WindowEventManager {
     private final List<ResizeWindowEventListener> resizeWindowEventListeners = new CopyOnWriteArrayList<>();
     private final List<CursorPositionEventListener> cursorPositionEventListeners = new CopyOnWriteArrayList<>();
 
-    public WindowEventManager(Long windowId) {
+    public WindowEvents(Long windowId) {
         this.windowId = windowId;
     }
 
-    public void addMouseButtonEventListener(MouseButtonEventListener listener) {
+    private void addMouseButtonEventListener(MouseButtonEventListener listener) {
         mouseButtonEventListeners.add(listener);
     }
 
-    public void addScrollEventListener(ScrollEventListener listener) {
+    private void addScrollEventListener(ScrollEventListener listener) {
         scrollEventListeners.add(listener);
     }
 
-    public void addKeyEventListener(KeyEventListener listener) {
+    private void addKeyEventListener(KeyEventListener listener) {
         keyEventListeners.add(listener);
     }
 
-    public void addResizeWindowEventListener(ResizeWindowEventListener listener) {
+    private void addResizeWindowEventListener(ResizeWindowEventListener listener) {
         resizeWindowEventListeners.add(listener);
     }
 
-    public void addCursorPositionEventListener(CursorPositionEventListener listener) {
-        cursorPositionEventListeners.add(listener);
-    }
-
+    @LwjglMainThread
     public void configureEventCallbacks() {
         GLFW.glfwSetKeyCallback(windowId, new GLFWKeyCallback() {
             @Override
@@ -111,6 +109,10 @@ public class WindowEventManager {
                 processWindowResizeEvent(windowResizeEvent);
             }
         });
+    }
+
+    private void addCursorPositionEventListener(CursorPositionEventListener listener) {
+        cursorPositionEventListeners.add(listener);
     }
 
     private void processCursorPositionEvent(CursorPositionEvent cursorPositionEvent) {

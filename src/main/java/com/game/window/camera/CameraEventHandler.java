@@ -1,24 +1,19 @@
 package com.game.window.camera;
 
+import com.game.event.window.cursor.CursorPositionEvent;
+import com.game.event.window.key.KeyEvent;
+import com.game.event.window.listener.WindowEventListener;
+import com.game.event.window.mouse.MouseButton;
+import com.game.event.window.mouse.MouseButtonEvent;
+import com.game.event.window.scroll.ScrollEvent;
 import com.game.utils.log.LogUtil;
-import com.game.event.scroll.ScrollEvent;
-import com.game.event.cursor.CursorPositionEvent;
-import com.game.event.key.KeyEvent;
-import com.game.event.listener.CursorPositionEventListener;
-import com.game.event.listener.KeyEventListener;
-import com.game.event.listener.MouseButtonEventListener;
-import com.game.event.listener.ScrollEventListener;
-import com.game.event.mouse.MouseButton;
-import com.game.event.mouse.MouseButtonEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class CameraEventHandler implements KeyEventListener, ScrollEventListener, MouseButtonEventListener, CursorPositionEventListener {
-    private final CameraContext cameraContext;
+public class CameraEventHandler implements WindowEventListener {
     private final CameraState state;
 
     public CameraEventHandler(CameraContext cameraContext) {
-        this.cameraContext = cameraContext;
         this.state = cameraContext.getCameraState();
         look();
     }
@@ -71,8 +66,9 @@ public class CameraEventHandler implements KeyEventListener, ScrollEventListener
     private void look() {
         Matrix4f m = new Matrix4f();
         m.lookAt(eye(), center(), up());
-        state.setLookAtMatrix(m);
-        cameraContext.getProgram().cameraViewMatrixChanged(state.getLookAtMatrixCopy());
+        state.setCameraViewMatrix(m);
+//        TODO DEL
+//        cameraContext.getProgram().cameraViewMatrixChanged(state.getCameraViewMatrixCopy());
     }
 
     private Vector3f eye() {
@@ -89,7 +85,7 @@ public class CameraEventHandler implements KeyEventListener, ScrollEventListener
 
     @Override
     public void event(KeyEvent keyEvent) {
-        var step = cameraContext.getMoveStep();
+        var step = state.getMoveStep();
         switch (keyEvent.getKeyActionType()) {
             case PRESSED:
                 switch (keyEvent.getKey()) {
@@ -130,7 +126,7 @@ public class CameraEventHandler implements KeyEventListener, ScrollEventListener
 
     @Override
     public void event(ScrollEvent scrollEvent) {
-        stepY((int) scrollEvent.getOffsetY() * (-cameraContext.getMoveStep()));
+        stepY((int) scrollEvent.getOffsetY() * (-state.getMoveStep()));
     }
 
     @Override
@@ -151,11 +147,11 @@ public class CameraEventHandler implements KeyEventListener, ScrollEventListener
     }
 
     @Override
-    public void event(CursorPositionEvent cursorPositionEvent) {
+    public void event(CursorPositionEvent event) {
         state.previousCursorPositionX = state.cursorPositionX;
         state.previousCursorPositionY = state.cursorPositionY;
-        state.cursorPositionX = (float) cursorPositionEvent.getX();
-        state.cursorPositionY = (float) cursorPositionEvent.getY();
+        state.cursorPositionX = (float) event.getX();
+        state.cursorPositionY = (float) event.getY();
         if (state.isRightMousePressed) {
             if (state.previousCursorPositionX != state.cursorPositionX) {
                 var rotationDirection = -1f;

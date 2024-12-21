@@ -1,11 +1,12 @@
 package com.game.window.camera.world;
 
-import com.game.event.mouse.MouseButtonEvent;
+import com.game.event.window.mouse.MouseButtonEvent;
+import com.game.window.screen.world.WorldScreenState;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-public class CameraToWorldConverter  {
+public class CameraToWorldConverter {
     private final double mouseX;
     private final double mouseY;
     private final Matrix4f projectionMatrix;
@@ -22,10 +23,10 @@ public class CameraToWorldConverter  {
         this.viewMatrix = viewMatrix;
     }
 
-    public Vector3f rayVector() {
+    public Vector3f rayVector(WorldScreenState worldScreenState) {
         // Get the width and height of the window
-        int width = 500/* Your window width */;
-        int height = 500/* Your window height */;
+        float width = worldScreenState.getWidth()/* Your window width */;
+        float height = worldScreenState.getHeight()/* Your window height */;
 
         // Normalize mouse coordinates
         float x = (float) (2.0 * mouseX / width - 1.0);

@@ -14,7 +14,7 @@ import static org.lwjgl.opengl.GL20.glGetShaderi;
 
 
 public class Shader {
-    protected static final String SHADER_WAS_DELETED_TEMPLATE = "Shader was deleted. Id [%s], path [%s], type [%s]";
+    private static final String SHADER_WAS_DELETED_TEMPLATE = "Shader was deleted. Id [%s], path [%s], type [%s]";
     private final String resourcePath;
     private final int shaderType;
     private final int id;

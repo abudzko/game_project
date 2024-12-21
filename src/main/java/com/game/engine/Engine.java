@@ -1,15 +1,15 @@
 package com.game.engine;
 
 import com.game.dao.GameUnitDao;
+import com.game.event.window.key.KeyEvent;
+import com.game.event.window.listener.KeyEventListener;
+import com.game.event.window.listener.MouseButtonEventListener;
+import com.game.event.window.mouse.MouseButton;
+import com.game.event.window.mouse.MouseButtonAction;
+import com.game.event.window.mouse.MouseButtonEvent;
 import com.game.model.GameUnit;
 import com.game.utils.log.LogUtil;
 import com.game.window.Window;
-import com.game.event.key.KeyEvent;
-import com.game.event.listener.KeyEventListener;
-import com.game.event.listener.MouseButtonEventListener;
-import com.game.event.mouse.MouseButton;
-import com.game.event.mouse.MouseButtonAction;
-import com.game.event.mouse.MouseButtonEvent;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Consumer;
 
+/**
+ * TODO screen??
+ */
 public class Engine implements Runnable, KeyEventListener, MouseButtonEventListener {
 
     protected static final Random RANDOM = new Random();
@@ -36,9 +39,10 @@ public class Engine implements Runnable, KeyEventListener, MouseButtonEventListe
 
     @Override
     public void run() {
-        window.addEventListener(this);
+        window.registerWindowEventListener(this);
         isRunning = true;
         boolean set = false;
+        //TODO why loop?
         while (isRunning) {
             if (!set) {
                 set = true;
@@ -75,8 +79,6 @@ public class Engine implements Runnable, KeyEventListener, MouseButtonEventListe
                     public void accept(GameUnit gameUnit) {
                         gameUnit.getPosition().x = resolvePosition(gameUnit.getPosition().x);
                         gameUnit.getPosition().z = resolvePosition(gameUnit.getPosition().z);
-//                        gameUnit.getRotation().x = gameUnit.getRotation().x + 0.1F;
-//                        gameUnit.getRotation().y = gameUnit.getRotation().y + 0.1F;
                         gameUnit.getRotation().x = rotation(gameUnit.getRotation().x);
                         window.addGameUnit(gameUnit);
                     }

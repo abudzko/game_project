@@ -1,4 +1,4 @@
-package com.game.event.mouse;
+package com.game.event.window.mouse;
 
 public class MouseButtonEvent {
     private final MouseButton button;

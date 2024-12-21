@@ -1,4 +1,4 @@
-package com.game.event.key;
+package com.game.event.window.key;
 
 public enum KeyActionType {
     RELEASED(0),

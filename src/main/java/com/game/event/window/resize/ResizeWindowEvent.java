@@ -1,4 +1,4 @@
-package com.game.event.resize;
+package com.game.event.window.resize;
 
 public class ResizeWindowEvent {
 

@@ -1,4 +1,4 @@
-package com.game.event.cursor;
+package com.game.event.window.cursor;
 
 public class CursorPositionEvent {
     private final double x;
