@@ -1,10 +1,9 @@
 package com.game.dao;
 
 import com.game.model.GameUnit;
-import com.game.model.ObjModel;
-import com.game.model.manual.CubeManualModel;
-import com.game.model.manual.GroundManualModel;
 import com.game.model.manual.SkyManualModel;
+import com.game.model.obj.ObjModel;
+import com.game.model.obj.ObjModelProperties;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -19,13 +18,14 @@ public class GameUnitDao {
 
     private static List<GameUnit> createUnits() {
         var gameUnits = new ArrayList<GameUnit>();
-        var unit1 = new GameUnit(
-                1,
-                new Vector3f(0f, 0f, 0f),
-                new Vector3f(0f, 0f, 0f),
-                10f,
-                new GroundManualModel()
-        );
+        var groundUnit = createGroundUnit();
+//        var groundUnit = new GameUnit(
+//                1,
+//                new Vector3f(0f, 0f, 0f),
+//                new Vector3f(0f, 0f, 0f),
+//                10f,
+//                new GroundManualModel()
+//        );
         var unit2 = new GameUnit(
                 2,
                 new Vector3f(0f, 0f, -10f),
@@ -34,9 +34,9 @@ public class GameUnitDao {
                 new SkyManualModel()
         );
         var unit3 = createCudeGameUnit(new Vector3f(0f, 0f, 0f));
-        gameUnits.add(unit1);
-        gameUnits.add(unit2);
-        gameUnits.add(unit3);
+        gameUnits.add(groundUnit);
+//        gameUnits.add(unit2  );
+//        gameUnits.add(unit3);
         return gameUnits;
     }
 
@@ -46,8 +46,12 @@ public class GameUnitDao {
                 position,
                 new Vector3f(0f, 0f, 0f),
                 0.1f,
-                new CubeManualModel()
-        );
+                new ObjModel(
+                        ObjModelProperties.create(
+                                "src/main/resources/obj/cube1.obj",
+                                "/texture/any.png"
+                        )
+                ));
     }
 
     private static GameUnit createMainUnit() {
@@ -55,9 +59,27 @@ public class GameUnitDao {
                 MAIN_UNIT_ID,
                 new Vector3f(0f, 0.5f, 0f),
                 new Vector3f(0f, 0f, 0f),
+                0.2f,
+                new ObjModel(
+                        ObjModelProperties.create(
+                                "src/main/resources/obj/monkey2.obj",
+                                "/texture/red.png"
+                        )
+                ));
+    }
+
+    private static GameUnit createGroundUnit() {
+        return new GameUnit(
+                1,
+                new Vector3f(0f, 0.0f, 0f),
+                new Vector3f(0f, 0f, 0f),
                 0.1f,
-                new ObjModel("src/main/resources/obj/monkey.obj")
-        );
+                new ObjModel(
+                        ObjModelProperties.create(
+                                "src/main/resources/obj/map2.obj",
+                                "/texture/ground.png"
+                        )
+                ));
     }
 
     public List<GameUnit> getUnits() {
@@ -75,7 +97,27 @@ public class GameUnitDao {
                 new Vector3f(0f, 0.5f, 0f),
                 new Vector3f(0f, 0f, 0f),
                 0.1f,
-                new ObjModel("src/main/resources/obj/tor1.obj")
-        );
+                new ObjModel(
+                        ObjModelProperties.create(
+                                "src/main/resources/obj/tor1.obj",
+                                "/texture/any.png"
+                        )
+                ));
+
+    }
+
+    public GameUnit createSunGameUnit() {
+        long id = RANDOM.nextLong();
+        return new GameUnit(
+                id,
+                new Vector3f(-5f, 3f, 5f),
+                new Vector3f(0f, 0f, 0f),
+                0.1f,
+                new ObjModel(
+                        ObjModelProperties.create(
+                                "src/main/resources/obj/sun.obj",
+                                "/texture/sun.png"
+                        )
+                ));
     }
 }

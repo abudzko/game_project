@@ -134,18 +134,26 @@ public class Window extends AbstractWindowEventListener {
         windowSizeChanged = true;
     }
 
-    public void addGameUnit(GameUnit gameUnit) {
-        worldScreen.addGameUnit(gameUnit);
-    }
-
     // TODO ??
+
     public Vector3f getWorldCoordinates(MouseButtonEvent mouseButtonEvent) {
         return worldScreen.getWorldCoordinates(mouseButtonEvent);
     }
-
     @Override
     public void event(ResizeWindowEvent event) {
         super.event(event);
         windowSizeChanged(event);
+    }
+
+    public void addGameUnit(GameUnit gameUnit) {
+        worldScreen.addGameUnit(gameUnit);
+    }
+
+    public void updateGameUnit(GameUnit gameUnit) {
+        worldScreen.updateGameUnit(gameUnit);
+    }
+
+    public void deleteGameUnit(GameUnit gameUnit) {
+        worldScreen.deleteGameUnit(gameUnit);
     }
 }

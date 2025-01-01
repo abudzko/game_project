@@ -5,15 +5,24 @@ import org.joml.Matrix4f;
 
 public class RenderObjects {
     private Iterable<DrawableModel> models;
+    private float[] lightPosition;
+    private float[] cameraPosition;
+    private Iterable<DrawableModel> deletedModels;
     private Matrix4f cameraViewMatrix;
     private Matrix4f projectionMatrix;
-
     public Iterable<DrawableModel> getModels() {
         return models;
     }
 
     public void setModels(Iterable<DrawableModel> models) {
         this.models = models;
+    }
+    public Iterable<DrawableModel> getDeletedModels() {
+        return deletedModels;
+    }
+
+    public void setDeletedModels(Iterable<DrawableModel> deletedModels) {
+        this.deletedModels = deletedModels;
     }
 
     public Matrix4f getCameraViewMatrix() {
@@ -30,5 +39,21 @@ public class RenderObjects {
 
     public void setProjectionMatrix(Matrix4f projectionMatrix) {
         this.projectionMatrix = projectionMatrix;
+    }
+
+    public float[] getLightPosition() {
+        return lightPosition;
+    }
+
+    public void setLightPosition(float[] lightPosition) {
+        this.lightPosition = lightPosition;
+    }
+
+    public float[] getCameraPosition() {
+        return cameraPosition;
+    }
+
+    public void setCameraPosition(float[] cameraPosition) {
+        this.cameraPosition = cameraPosition;
     }
 }

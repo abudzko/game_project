@@ -21,7 +21,7 @@ public class CameraState {
     public float cursorPositionY;
     public float previousCursorPositionX;
     public float previousCursorPositionY;
-    private float fov = (float) Math.toRadians(50f);
+    private float fov = (float) Math.toRadians(60f);
     private float zNear = 0.05f;
     private float zFar = 30.f;
     private float moveStep = 0.1f;

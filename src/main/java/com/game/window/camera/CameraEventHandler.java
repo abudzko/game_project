@@ -13,8 +13,8 @@ import org.joml.Vector3f;
 public class CameraEventHandler implements WindowEventListener {
     private final CameraState state;
 
-    public CameraEventHandler(CameraContext cameraContext) {
-        this.state = cameraContext.getCameraState();
+    public CameraEventHandler(CameraState cameraState) {
+        this.state = cameraState;
         look();
     }
 
@@ -31,13 +31,13 @@ public class CameraEventHandler implements WindowEventListener {
     }
 
     private void stepY(float delta) {
-        float newValue = state.eyeY + delta;
-        if (newValue > 0.1) {
-            LogUtil.log(String.format("Move camera from %s to %s eyeY position", state.eyeY, newValue));
-            state.eyeY = newValue;
+        float newValueY = state.eyeY + delta;
+        if (newValueY > 0.1) {
+            LogUtil.log(String.format("Move camera from %s to %s eyeY position", state.eyeY, newValueY));
+            state.eyeY = newValueY;
             look();
         } else {
-            LogUtil.log(String.format("Can't move camera from %s to %s eyeY position", state.eyeY, newValue));
+            LogUtil.log(String.format("Can't move camera from %s to %s eyeY position", state.eyeY, newValueY));
         }
     }
 
@@ -67,8 +67,6 @@ public class CameraEventHandler implements WindowEventListener {
         Matrix4f m = new Matrix4f();
         m.lookAt(eye(), center(), up());
         state.setCameraViewMatrix(m);
-//        TODO DEL
-//        cameraContext.getProgram().cameraViewMatrixChanged(state.getCameraViewMatrixCopy());
     }
 
     private Vector3f eye() {

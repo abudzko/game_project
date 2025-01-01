@@ -1,6 +1,6 @@
 package com.game;
 
-import com.game.engine.Engine;
+import com.game.engine.TestEngine;
 import com.game.window.WindowContainer;
 
 public class Game {
@@ -17,7 +17,7 @@ public class Game {
             throw new IllegalStateException(e);
         }
         windowContainer.getWindows().forEach((id, window) -> {
-            var engine = new Engine(window);
+            var engine = new TestEngine(window);
             new Thread(engine).start();
         });
     }

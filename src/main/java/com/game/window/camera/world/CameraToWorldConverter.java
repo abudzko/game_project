@@ -48,7 +48,6 @@ public class CameraToWorldConverter {
         Vector3f direction = new Vector3f(worldRay.x, worldRay.y, worldRay.z);
         direction.normalize();
 
-
         return direction;
     }
 }

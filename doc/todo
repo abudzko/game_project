@@ -1,0 +1,8 @@
+unit selection on world screen
+ground(x y z ) - in blender
+sky, sky box https://lwjglgamedev.gitbooks.io/3d-game-development-with-lwjgl/content/chapter13/chapter13.html
+reuse textures
+sun
+update java and use virtual threads (
+use indexes
+lighting, Phong shading algorithm

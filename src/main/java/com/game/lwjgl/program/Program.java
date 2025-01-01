@@ -5,6 +5,7 @@ import com.game.model.DrawableModel;
 import com.game.model.GameUnit;
 import com.game.utils.BufferUtils;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL30;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,10 +52,6 @@ public class Program {
     private final Shader vertexShader;
     private final Shader fragmentShader;
     private final ConcurrentHashMap<String, Integer> uniformCache = new ConcurrentHashMap<>();
-    //    private Matrix4f cameraViewMatrix;
-//    private boolean cameraViewMatrixChanged = false;
-//    private Matrix4f projectionMatrix;
-//    private boolean projectionMatrixChanged = false;
     private int programId;
     private Integer positionAttributeId;
     private Integer textureAttributeId;
@@ -106,13 +103,18 @@ public class Program {
             glBindVertexArray(0);
         }
 
+        if (renderObjects.getDeletedModels() != null) {
+            for (var deletedModel : renderObjects.getDeletedModels()) {
+                //TODO delete vbo or we can reuse them for the similar units?
+                //TODO delete texture id or we can reuse them for the similar units?
+                GL30.glDeleteVertexArrays(deletedModel.getVaoId());
+            }
+        }
         if (renderObjects.getCameraViewMatrix() != null) {
             setUniformMatrix4f(CAMERA_VIEW_MATRIX_NAME, renderObjects.getCameraViewMatrix());
-//            cameraViewMatrixChanged = false;
         }
         if (renderObjects.getProjectionMatrix() != null) {
             setUniformMatrix4f(PROJECTION_MATRIX_NAME, renderObjects.getProjectionMatrix());
-//            projectionMatrixChanged = false;
         }
         disable();
     }
@@ -128,7 +130,6 @@ public class Program {
         int verticesVboId = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, verticesVboId);
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-
         glVertexAttribPointer(getPositionAttribute(), POINT_PER_VERTEX_3D, GL_FLOAT, false, 0, 0);
 
         // Unbind the VBO
@@ -146,15 +147,17 @@ public class Program {
         BufferUtils.memFree(textureVertices);
 
         // TODO Normals - Not used
-        int normalVboId = glGenBuffers();
-        var normalVertices = BufferUtils.createFloatBuffer4f(gameUnit.getModel().modelTexture().textureVertices());
-        glBindBuffer(GL_ARRAY_BUFFER, normalVboId);
-        glBufferData(GL_ARRAY_BUFFER, normalVertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(getNormalAttribute(), 3, GL_FLOAT, false, 0, 0);
-
-        // Unbind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        BufferUtils.memFree(textureVertices);
+        // Vertex normals
+        var vertexNormals = gameUnit.getModel().triangleVertexNormals();
+        if (vertexNormals != null) {
+            int normalsVboId = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, normalsVboId);
+            glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+            glVertexAttribPointer(getNormalAttribute(), POINT_PER_VERTEX_3D, GL_FLOAT, false, 0, 0);
+            // Unbind the VBO
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            BufferUtils.memFree(vertexNormals);
+        }
 
         // Unbind the VAO
         glBindVertexArray(0);
@@ -186,16 +189,6 @@ public class Program {
         vertexShader.deleteShader();
         fragmentShader.deleteShader();
     }
-
-//    public void cameraViewMatrixChanged(Matrix4f cameraViewMatrix) {
-//        this.cameraViewMatrix = cameraViewMatrix;
-//        this.cameraViewMatrixChanged = true;
-//    }
-//
-//    public void projectionMatrixChanged(Matrix4f projectionMatrix) {
-//        this.projectionMatrix = projectionMatrix;
-//        this.projectionMatrixChanged = true;
-//    }
 
     private void setUniformMatrix4f(String name, Matrix4f matrix4f) {
         var floatBuffer = BufferUtils.toFloatBuffer(matrix4f);

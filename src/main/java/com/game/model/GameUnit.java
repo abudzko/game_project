@@ -10,7 +10,7 @@ import org.joml.Vector3f;
  * - rotation
  * - scale
  */
-public class GameUnit implements KeyEventListener {
+public class GameUnit {
     private final long id;
     private final Vector3f position;
     /**
@@ -53,10 +53,5 @@ public class GameUnit implements KeyEventListener {
 
     public Model getModel() {
         return model;
-    }
-
-    @Override
-    public void event(KeyEvent keyEvent) {
-
     }
 }

@@ -25,5 +25,9 @@ public interface Model {
      */
     FloatBuffer triangleVertices();
 
+    default FloatBuffer triangleVertexNormals(){
+        return null;
+    }
+
     ModelTexture modelTexture();
 }
