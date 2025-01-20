@@ -48,9 +48,12 @@ public class LightingProgram {
     protected static final String POSITION_ATTRIBUTE_NAME = "positionAttribute";
     protected static final String NORMAL_ATTRIBUTE_NAME = "normalAttribute";
     protected static final String TEXTURE_ATTRIBUTE_NAME = "textureAttribute";
-    protected static final String LIGHT_POSITION_NAME = "lightPosition";
     protected static final String CAMERA_POSITION_NAME = "cameraPosition";
     protected static final String SHADER_PATH = "src/main/resources/shaders/light/";
+
+    protected static final String LIGHT_COLOR_NAME = "lightColor";
+    protected static final String LIGHT_POSITION_NAME = "lightPosition";
+    protected static final String IS_LIGHT_NAME = "isLight";
     private final Shader vertexShader;
     private final Shader fragmentShader;
     private final ConcurrentHashMap<String, Integer> uniformCache = new ConcurrentHashMap<>();
@@ -83,8 +86,16 @@ public class LightingProgram {
 
         enable();
 
+        DrawableModel lightModel = null;
+
         for (var drawableModel : renderObjects.getModels()) {
             setUniformMatrix4f(WORLD_MATRIX_NAME, drawableModel.getWorldMatrix());
+            if (drawableModel.isLight()) {
+                lightModel = drawableModel;
+                setUniformInt(IS_LIGHT_NAME, 1);
+            } else {
+                setUniformInt(IS_LIGHT_NAME, 0);
+            }
             // Bind to the VAO
             glBindVertexArray(drawableModel.getVaoId());
 
@@ -121,9 +132,16 @@ public class LightingProgram {
         if (renderObjects.getProjectionMatrix() != null) {
             setUniformMatrix4f(PROJECTION_MATRIX_NAME, renderObjects.getProjectionMatrix());
         }
-        if (renderObjects.getLightPosition() != null) {
-            setUniformVec3(LIGHT_POSITION_NAME, renderObjects.getLightPosition());
+
+        // TODO single light is supported
+        if (lightModel != null) {
+            var light = lightModel.getLight();
+            var lightPosition = light.getLightPosition();
+            setUniformVec3(LIGHT_POSITION_NAME, new float[]{lightPosition.x, lightPosition.y, lightPosition.z});
+            var lightColor = light.getLightColor();
+            setUniformVec3(LIGHT_COLOR_NAME, new float[]{lightColor.x, lightColor.y, lightColor.z});
         }
+
         if (renderObjects.getCameraPosition() != null) {
             setUniformVec3(CAMERA_POSITION_NAME, renderObjects.getCameraPosition());
         }
@@ -207,6 +225,13 @@ public class LightingProgram {
                 vector3f[0],
                 vector3f[1],
                 vector3f[2]
+        );
+    }
+
+    private void setUniformInt(String name, int value) {
+        GL30.glUniform1i(
+                getUniformIdBy(name),
+                value
         );
     }
 

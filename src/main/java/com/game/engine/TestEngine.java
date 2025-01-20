@@ -55,6 +55,7 @@ public class TestEngine implements Runnable, KeyEventListener, MouseButtonEventL
             gameUnitDao.getUnits().forEach(window::addGameUnit);
             var sun = gameUnitDao.createSunGameUnit();
             window.addGameUnit(sun);
+            animateSun(sun);
 //            addRandomUnits();
         }
         try {
@@ -122,6 +123,33 @@ public class TestEngine implements Runnable, KeyEventListener, MouseButtonEventL
                     gameUnit.getRotation().y = rotation(gameUnit.getRotation().y);
                     window.updateGameUnit(gameUnit);
                     Thread.sleep(100);
+                } catch (Exception e) {
+                    LogUtil.logError("animate failed", e);
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void animateSun(GameUnit sun) {
+        Thread thread = new Thread(() -> {
+            var directionX = 1;
+            var directionZ = 1;
+            while (isRunning) {
+                try {
+                    var x = sun.getPosition().x;
+                    if (x > 10 || x < -10) {
+                        directionX = -directionX;
+                    }
+                    var z = sun.getPosition().z;
+                    if (z > 10 || z < -10) {
+                        directionZ = -directionZ;
+                    }
+                    sun.getPosition().x = sun.getPosition().x + directionX * moveStep * 5;
+                    sun.getPosition().z = sun.getPosition().z + directionZ * moveStep * 5;
+                    window.updateGameUnit(sun);
+                    Thread.sleep(10);
                 } catch (Exception e) {
                     LogUtil.logError("animate failed", e);
                 }
